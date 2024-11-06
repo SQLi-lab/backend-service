@@ -9,8 +9,8 @@ Django API Service
 
 
 ## Переменные окружения
-- POSTGRES_HOST: default localhost
-- POSTGRES_DB: default sqli_lab
-- POSTGRES_USER: default sqli_user
-- POSTGRES_PASS: default sqli_pass
-- POSTGRES_PORT: default 5432
+- `POSTGRES_HOST`: адрес БД; default `localhost`
+- `POSTGRES_DB`: имя БД; default `sqli_lab`
+- `POSTGRES_PORT`: порт БД; default `5432`
+- `POSTGRES_USER`: имя пользователя БД; default `sqli_user`
+- `POSTGRES_PASS`: пароль пользователя БД; default `sqli_pass`
