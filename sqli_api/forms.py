@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm
-from .models import CustomUser
+from .models import CustomUser, Lab
 
 from django import forms
 from .models import CustomUser
@@ -13,7 +13,7 @@ class CustomUserCreationForm(forms.ModelForm):
 
     class Meta:
         model = CustomUser
-        fields = ['email', 'username', 'group']
+        fields = ['email', 'username', 'study_group']
 
     def clean_password2(self):
         password1 = self.cleaned_data.get('password1')
@@ -25,8 +25,7 @@ class CustomUserCreationForm(forms.ModelForm):
         return password2
 
 
-
-
 class CustomLoginForm(AuthenticationForm):
     username = forms.CharField(label='Email', max_length=255)
     password = forms.CharField(label='Password', widget=forms.PasswordInput)
+

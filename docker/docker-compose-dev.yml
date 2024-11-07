@@ -1,20 +1,20 @@
 version: "3.8"
 
 services:
-  qsli_lab:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile
-    restart: always
-    container_name: sqli_lab
-    command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
-    ports:
-      - "8000:8000"
-    depends_on:
-      migrator:
-        condition: service_completed_successfully
-    env_file:
-      - ../.env.example
+#  qsli_lab:
+#    build:
+#      context: ..
+#      dockerfile: docker/Dockerfile
+#    restart: always
+#    container_name: sqli_lab
+#    command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+#    ports:
+#      - "8000:8000"
+#    depends_on:
+#      migrator:
+#        condition: service_completed_successfully
+#    env_file:
+#      - ../.env.example
 
   migrator:
     build:

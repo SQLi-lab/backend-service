@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <br>
+    <a href="{% url 'logout' %}">Logout</a>
+    <br>
+    <title>Лабораторные работы</title>
+    <script>
+        // Функция для создания лабораторной работы
+        function createLab() {
+            fetch('/labs/add/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json'
+                },
+            })
+                .then(response => {
+                    if (response.status !== 200) {
+                        return response.json().then(errorData => {
+                            throw new Error(errorData.message || 'Ошибка при создании лабораторной работы');
+                        });
+                    } else {
+                        return response.json();
+                    }
+                })
+                .then(data => {
+                    alert(`Лабораторная работа создана: ID = ${data.lab_id}`);
+                    window.location.reload();
+                })
+                .catch(error => {
+                    console.error(error);
+                    alert('Ошибка создания лабы: ' + error.message);
+                });
+        }
+
+        // Функция для удаления лабораторной работы
+        function deleteLab(labId) {
+            if (!confirm('Вы уверены, что хотите удалить лабораторную работу?')) {
+                return;
+            }
+
+            fetch(`/labs/${labId}/delete`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json'
+                },
+            })
+                .then(response => {
+                    if (response.status !== 200) {
+                        return response.json().then(errorData => {
+                            throw new Error(errorData.message || 'Ошибка при удалении лабораторной работы');
+                        });
+                    } else {
+                        return response.json();
+                    }
+                })
+                .then(data => {
+                    alert(`Лабораторная работа с ID ${data.lab_id} удалена`);
+                    window.location.reload();
+                })
+                .catch(error => {
+                    console.error(error);
+                    alert('Ошибка удаления лабы: ' + error.message);
+                });
+        }
+
+        // Функция для получения CSRF токена
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+</head>
+<body>
+<h1>Список лабораторных работ</h1>
+<ul>
+    {% for lab in labs %}
+        <li>
+            <a href="{% url 'lab_info' lab.id %}">Лабораторная
+                работа {{ lab.id }} - {{ lab.status }}</a>
+            <button onclick="deleteLab({{ lab.id }})">Удалить</button>
+            <!-- Кнопка для удаления -->
+        </li>
+    {% endfor %}
+</ul>
+
+<button onclick="createLab()">Создать новую лабораторную работу</button>
+</body>
+</html>
