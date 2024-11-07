@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лабораторная SQLi </title>
+
+    <!-- Custom fonts and styles -->
+    <link href="{% static 'vendor/fontawesome-free/css/all.min.css' %}"
+          rel="stylesheet" type="text/css">
+    <link href="{% static 'css/sb-admin-2.min.css' %}" rel="stylesheet">
+    <style>
+        .toast-container {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 1055;
+        }
+        .text-bg-warning {
+            background-color: #ffd580 !important; /* Мягкий желтый */
+            color: #333333 !important; /* Темный текст для контраста */
+        }
+    </style>
+</head>
+
+<body class="bg-gradient-primary">
+<div class="toast-container">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="toast align-items-center text-bg-warning border-0"
+                 role="alert" aria-live="assertive" aria-atomic="true">
+        
+                <div class="d-flex">
+                    <div class="toast-body">
+                        {{ message }}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>
+
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-xl-10 col-lg-12 col-md-9">
+            <div class="card o-hidden border-0 shadow-lg my-5">
+                <div class="card-body p-0">
+                    <div class="row">
+                        <div class="col-lg-6 d-none d-lg-block">
+                            <img src="{% static 'img/logo.png' %}"
+                                 alt="Login Image" class="img-fluid">
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="p-5">
+                                <div class="text-center">
+                                    <h1 class="h4 text-gray-900 mb-4">Вход в
+                                        систему</h1>
+                                </div>
+                                <form method="POST" class="user">
+                                    {% csrf_token %}
+                                    <div class="form-group">
+                                        <input type="text" name="username"
+                                               class="form-control form-control-user"
+                                               placeholder="Введите Email"
+                                               required>
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="password"
+                                               name="password"
+                                               class="form-control form-control-user"
+                                               placeholder="Введите пароль"
+                                               required>
+                                    </div>
+                                    <button type="submit"
+                                            class="btn btn-primary btn-user btn-block">
+                                        Войти
+                                    </button>
+                                </form>
+                                <hr>
+                                <a href="{% url 'register' %}"
+                                   class="btn btn-secondary btn-user btn-block">Регистрация</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<footer class="text-center mt-5">
+    <div class="text-white">
+        <p>&copy; 2024. СПбПУ, Высшая школа кибербезопасности.<br>
+            Разработано в помощь преподавателям.</p>
+    </div>
+</footer>
+
+<!-- Scripts -->
+<script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+<script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var toastElList = [].slice.call(document.querySelectorAll('.toast'));
+        var toastList = toastElList.map(function (toastEl) {
+            var toast = new bootstrap.Toast(toastEl, {
+                autohide: true, 
+                delay: 5000    
+            });
+            toast.show();
+            return toast;
+        });
+    });
+</script>
+</body>
+
+</html>

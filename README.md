@@ -1,8 +1,9 @@
 # backend-service
 Django API Service 
 
-## Инициализация проекта 
-1. docker compose -f docker/docker-compose-dev.yml up --build 
+## Инициализация проекта
+1. tar -xvf static.tar.gz
+2. docker compose -f docker/docker-compose-dev.yml up --build 
 
 
 ## Переменные окружения
