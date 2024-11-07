@@ -19,7 +19,9 @@ def login_view(request):
                 login(request, user)
                 return redirect('labs')
             else:
-                messages.error(request, 'Invalid login or password')
+                messages.error(request, 'Ошибка авторизации!')
+        else:
+            messages.error(request, 'Неверный логин или пароль!')
     else:
         form = CustomLoginForm()
 
@@ -30,15 +32,21 @@ def register_view(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
-            CustomUser.objects.create_user(
-                username=form.cleaned_data['username'],
-                email=form.cleaned_data['email'],
-                study_group=form.cleaned_data['study_group'],
-                password=form.cleaned_data['password1']
-            )
+            username = form.cleaned_data['username']
+            email = form.cleaned_data['email']
+            study_group = form.cleaned_data['study_group']
+            password = form.cleaned_data['password1']
 
-            messages.success(request, 'Account created successfully!')
+            CustomUser.objects.create_user(username=username,
+                                           email=email,
+                                           password=password,
+                                           study_group=study_group)
+            messages.success(request, "Ваш аккаунт успешно создан! Вы можете войти.")
             return redirect('login')
+
+        else:
+            return render(request, 'accounts/register.html', {'form': form})
+
     else:
         form = CustomUserCreationForm()
 

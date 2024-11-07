@@ -8,8 +8,8 @@ from django import forms
 from .models import CustomUser
 
 class CustomUserCreationForm(forms.ModelForm):
-    password1 = forms.CharField(label='Password', widget=forms.PasswordInput)
-    password2 = forms.CharField(label='Confirm Password', widget=forms.PasswordInput)
+    password1 = forms.CharField(label='Пароль', widget=forms.PasswordInput)
+    password2 = forms.CharField(label='Подтверждение пароля', widget=forms.PasswordInput)
 
     class Meta:
         model = CustomUser
@@ -20,9 +20,15 @@ class CustomUserCreationForm(forms.ModelForm):
         password2 = self.cleaned_data.get('password2')
 
         if password1 != password2:
-            raise forms.ValidationError('Passwords do not match')
+            raise forms.ValidationError('Пароли не совпадают!')
 
         return password2
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if CustomUser.objects.filter(email=email).exists():
+            raise forms.ValidationError("Этот email уже зарегистрирован!")
+        return email
 
 
 class CustomLoginForm(AuthenticationForm):

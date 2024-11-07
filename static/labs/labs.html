@@ -91,7 +91,7 @@
     {% for lab in labs %}
         <li>
             <a href="{% url 'lab_info' lab.id %}">Лабораторная
-                работа {{ lab.id }} - {{ lab.status }}</a>
+                работа {{ lab.uuid }} - {{ lab.status }}</a>
             <button onclick="deleteLab({{ lab.id }})">Удалить</button>
             <!-- Кнопка для удаления -->
         </li>
