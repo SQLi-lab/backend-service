@@ -23,7 +23,6 @@
     <link href="{% static 'css/sb-admin-2.min.css' %}" rel="stylesheet">
 
 
-
 </head>
 
 
@@ -96,7 +95,7 @@
                         <a class="collapse-item" href="register.html">Лабораторные</a>
                         <div class="collapse-divider"></div>
                         <h6 class="collapse-header">Другое:</h6>
-                        <a class="collapse-item" href="404.html">Django
+                        <a class="collapse-item" href="/admin/">Django
                             Admin</a>
                         <a class="collapse-item" href="blank.html">Помощь</a>
                     </div>
@@ -193,20 +192,40 @@
 
         </div>
 
-    </div>
-
-    <!-- End of Content Wrapper -->
-        <!-- Footer -->
-        <footer class="sticky-footer bg-white">
-            <div class="container my-auto">
-                <div class="copyright text-center my-auto">
-                    <span>2024. СПбПУ, Высшая школа кибербезопасности.<br>Разработано в помощь преподавателям.</span>
-                </div>
+        {% if not removed_labs.exists %}
             </div>
-        </footer>
-        <!-- End of Footer -->
-<!-- End of Page Wrapper -->
-</div>
+
+
+            <!-- End of Footer -->
+            <!-- End of Page Wrapper -->
+            </div>
+            <!-- Footer -->
+            <footer class="sticky-footer bg-white">
+                <div class="container my-auto">
+                    <div class="copyright text-center my-auto">
+                        <span>2024. СПбПУ, Высшая школа кибербезопасности.<br>Разработано в помощь преподавателям.</span>
+                    </div>
+                </div>
+            </footer>
+        {% else %}
+
+            <!-- Footer -->
+            <footer class="sticky-footer bg-white">
+                <div class="container my-auto">
+                    <div class="copyright text-center my-auto">
+                        <span>2024. СПбПУ, Высшая школа кибербезопасности.<br>Разработано в помощь преподавателям.</span>
+                    </div>
+                </div>
+            </footer>
+            </div>
+
+
+            <!-- End of Footer -->
+            <!-- End of Page Wrapper -->
+            </div>
+        {% endif %}
+
+<!-- End of Content Wrapper -->
 
 
 <!-- Scroll to Top Button-->

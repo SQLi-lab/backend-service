@@ -13,9 +13,11 @@
                 <div class="card-header py-3 d-flex align-items-center justify-content-between">
                     <h6 class="m-0 font-weight-bold text-primary">Активные
                         лабораторные</h6>
+                    {% if user.is_superuser and active_labs.exists %}
                     <button class="btn btn-primary" onclick="createLab()">
                         Создать лабораторную
                     </button>
+                    {% endif %}
                 </div>
 
                 <div class="card-body">

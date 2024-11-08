@@ -37,12 +37,12 @@ def labs(request):
                                                                     "status").order_by(
         f'-{sort_by}')
     # Пагинация для архива
-    paginator = Paginator(removed_labs, 8)  # 8 записей на страницу
+    paginator = Paginator(removed_labs, 8)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
     # Пагинация для активных работ
-    active_paginator = Paginator(active_labs, 8)  # 6 лабораторных на странице
+    active_paginator = Paginator(active_labs, 8)
     active_page_num = request.GET.get('page_active')
     active_page_obj = active_paginator.get_page(active_page_num)
 
@@ -115,7 +115,6 @@ def lab_info(request, uuid):
 
 @login_required
 def labs_stats(request):
-    # Пример данных, здесь нужно заменить на реальную логику из базы данных
     created_count = Lab.objects.filter(user=request.user).count()
     completed_count = Lab.objects.filter(user=request.user,
                                          is_done=True).count()
