@@ -15,11 +15,14 @@ def login_view(request):
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
             user = authenticate(request, username=username, password=password)
-            if user is not None:
-                login(request, user)
-                return redirect('labs')
+            if not user.verified:
+                messages.error(request, "Аккаунт не подтвержден! Дождитесь одобрения преподавателя.")
             else:
-                messages.error(request, 'Ошибка авторизации!')
+                if user is not None:
+                    login(request, user)
+                    return redirect('labs')
+                else:
+                    messages.error(request, 'Ошибка авторизации!')
         else:
             messages.error(request, 'Неверный логин или пароль!')
     else:

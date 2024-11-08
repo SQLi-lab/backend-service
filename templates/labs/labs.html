@@ -14,9 +14,9 @@
                     <h6 class="m-0 font-weight-bold text-primary">Активные
                         лабораторные</h6>
                     {% if user.is_superuser and active_labs.exists %}
-                    <button class="btn btn-primary" onclick="createLab()">
-                        Создать лабораторную
-                    </button>
+                        <button class="btn btn-primary" onclick="createLab()">
+                            Создать лабораторную
+                        </button>
                     {% endif %}
                 </div>
 
@@ -72,35 +72,37 @@
 
 
                         </div>
-                        <!-- Пагинация для активных лабораторных работ -->
-                        <nav aria-label="Page navigation">
-                            <ul class="pagination justify-content-center">
-                                {% if active_page_obj.has_previous %}
-                                    <li class="page-item">
-                                        <a class="page-link"
-                                           href="?page_active={{ active_page_obj.previous_page_number }}"
-                                           aria-label="Previous">
-                                            <span aria-hidden="true">&laquo;</span>
-                                        </a>
-                                    </li>
-                                {% endif %}
-                                {% for num in active_paginator.page_range %}
-                                    <li class="page-item {% if active_page_obj.number == num %}active{% endif %}">
-                                        <a class="page-link"
-                                           href="?page_active={{ num }}">{{ num }}</a>
-                                    </li>
-                                {% endfor %}
-                                {% if active_page_obj.has_next %}
-                                    <li class="page-item">
-                                        <a class="page-link"
-                                           href="?page_active={{ active_page_obj.next_page_number }}"
-                                           aria-label="Next">
-                                            <span aria-hidden="true">&raquo;</span>
-                                        </a>
-                                    </li>
-                                {% endif %}
-                            </ul>
-                        </nav>
+                        {% if user.is_superuser %}
+                            <!-- Пагинация для активных лабораторных работ -->
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination justify-content-center">
+                                    {% if active_page_obj.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link"
+                                               href="?page_active={{ active_page_obj.previous_page_number }}"
+                                               aria-label="Previous">
+                                                <span aria-hidden="true">&laquo;</span>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                    {% for num in active_paginator.page_range %}
+                                        <li class="page-item {% if active_page_obj.number == num %}active{% endif %}">
+                                            <a class="page-link"
+                                               href="?page_active={{ num }}">{{ num }}</a>
+                                        </li>
+                                    {% endfor %}
+                                    {% if active_page_obj.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link"
+                                               href="?page_active={{ active_page_obj.next_page_number }}"
+                                               aria-label="Next">
+                                                <span aria-hidden="true">&raquo;</span>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        {% endif %}
 
                     {% endif %}
                 </div>
@@ -353,5 +355,44 @@
             background-color: #f7fbff;
         }
     </style>
+    </div>
+
+        {% if not removed_labs.exists %}
+            </div>
+
+
+            <!-- End of Footer -->
+            <!-- End of Page Wrapper -->
+            </div>
+            <!-- Footer -->
+            <footer class="sticky-footer bg-white">
+                <div class="container my-auto">
+                    <div class="copyright text-center my-auto">
+                        <span>2024. СПбПУ, Высшая школа кибербезопасности.<br>Разработано в помощь преподавателям.</span>
+                    </div>
+                </div>
+            </footer>
+        {% else %}
+
+            <!-- Footer -->
+            <footer class="sticky-footer bg-white">
+                <div class="container my-auto">
+                    <div class="copyright text-center my-auto">
+                        <span>&copy; 2024. СПбПУ, Высшая школа кибербезопасности.<br>Разработано в помощь преподавателям.</span>
+                    </div>
+                </div>
+            </footer>
+            </div>
+
+
+            <!-- End of Footer -->
+            <!-- End of Page Wrapper -->
+            </div>
+        {% endif %}
+
+    
 {% endblock %}
 
+
+
+</div>

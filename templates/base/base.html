@@ -64,8 +64,8 @@
 
 
         <!-- Nav Item - Tables -->
-        <li class="nav-item">
-            <a class="nav-link" href="tables.html">
+        <li class="nav-item active">
+            <a class="nav-link" href="{% url 'help' %}">
                 <i class="fas fa-fw fa-info-circle"></i>
                 <span>Помощь</span></a>
         </li>
@@ -80,7 +80,7 @@
             </div>
 
             <!-- Nav Item - Pages Collapse Menu -->
-            <li class="nav-item">
+            <li class="nav-item active">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse"
                    data-target="#collapsePages"
                    aria-expanded="true" aria-controls="collapsePages">
@@ -172,7 +172,7 @@
                         <!-- Dropdown - User Information -->
                         <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
                              aria-labelledby="userDropdown">
-                            <a class="dropdown-item" href="#">
+                            <a class="dropdown-item" href="{% url 'my_account' %}">
                                 <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
                                 Профиль
                             </a>
@@ -190,41 +190,7 @@
             <!-- End of Topbar -->
             {% block content %}{% endblock %}
 
-        </div>
-
-        {% if not removed_labs.exists %}
-            </div>
-
-
-            <!-- End of Footer -->
-            <!-- End of Page Wrapper -->
-            </div>
-            <!-- Footer -->
-            <footer class="sticky-footer bg-white">
-                <div class="container my-auto">
-                    <div class="copyright text-center my-auto">
-                        <span>2024. СПбПУ, Высшая школа кибербезопасности.<br>Разработано в помощь преподавателям.</span>
-                    </div>
-                </div>
-            </footer>
-        {% else %}
-
-            <!-- Footer -->
-            <footer class="sticky-footer bg-white">
-                <div class="container my-auto">
-                    <div class="copyright text-center my-auto">
-                        <span>2024. СПбПУ, Высшая школа кибербезопасности.<br>Разработано в помощь преподавателям.</span>
-                    </div>
-                </div>
-            </footer>
-            </div>
-
-
-            <!-- End of Footer -->
-            <!-- End of Page Wrapper -->
-            </div>
-        {% endif %}
-
+        
 <!-- End of Content Wrapper -->
 
 

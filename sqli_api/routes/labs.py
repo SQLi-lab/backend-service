@@ -107,6 +107,10 @@ def lab_delete(request, uuid):
 @login_required
 def lab_info(request, uuid):
     lab = get_object_or_404(Lab, uuid=uuid)
+    if lab.user.id != request.user.id and not request.user.is_superuser:
+        return JsonResponse(
+            {'message': 'Нельзя просматривать чужие лабы! Дествие отправлено преподавателю.'}, status=403)
+
     context = {
         'lab': lab
     }

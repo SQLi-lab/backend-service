@@ -1,0 +1,127 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block title %}Мой аккаунт{% endblock %}
+
+{% block content %}
+    <!-- Begin Page Content -->
+
+    <div class="container-fluid">
+        <!-- Content Row -->
+
+        <div class="row">
+
+            <div class="col-xl-9 col-lg-5">
+                <div class="row">
+                    <div class="col-lg-9 mb-4">
+                        <div class="card bg-light text shadow">
+                            <div class="card-body text-primary">
+                                <h3>Данные профиля</h3>
+                            </div>
+                            <div class="card-body text-gray-900">
+                                <strong>ФИО:</strong> {{ user.username }}
+                            </div>
+                            <div class="card-body text-gray-900">
+                                <strong>E-mail:</strong> {{ user.email }}
+                            </div>
+                            <div class="card-body text-gray-900">
+                                <strong>Номер
+                                    группы:</strong> {{ user.study_group }}
+                            </div>
+                            <div class="card-body text-gray-900">
+                                <strong>Тип аккаунта:</strong> {{ role }}
+                            </div>
+
+                            <div class="card-body text-gray-900">
+                                <strong>Аккаунт
+                                    подтвержден:</strong> {{ verified }}
+                            </div>
+                            <div class="card-body text-gray-900">
+                                <strong>Дата
+                                    регистрации:</strong> {{ user.date_joined|date:"d.m.Y H:i" }}
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="row">
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-left-secondary shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">
+                                            Всего работ
+                                        </div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                            {{ all_labs }}
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-database fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-left-primary shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                           Активные работы
+                                        </div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                             {{ active_labs }}
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-terminal fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-left-success shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                            Решенные работы
+                                        </div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                            {{ done_labs }}
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-check fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    </div>
+    <!-- Footer -->
+    <footer class="sticky-footer bg-white">
+        <div class="container my-auto">
+            <div class="copyright text-center my-auto">
+                <span>&copy; 2024. СПбПУ, Высшая школа кибербезопасности.<br>Разработано в помощь преподавателям.</span>
+            </div>
+        </div>
+    </footer>
+    </div>
+
+
+    <!-- End of Footer -->
+    <!-- End of Page Wrapper -->
+    </div>
+
+
+{% endblock %}
