@@ -1,0 +1,81 @@
+{% extends 'base/base_login.html' %}
+{% load static %}
+{% block title %}Регистрация{% endblock %}
+
+{% block content %}
+<div class="card o-hidden border-0 shadow-lg my-5">
+        <div class="card-body p-0">
+            <!-- Nested Row within Card Body -->
+            <div class="row">
+                <div class="col-lg-6 d-none d-lg-block">
+                    <img src="{% static 'img/logo.png' %}" alt="Login Image"
+                         class="img-fluid">
+                </div>
+                <div class="col-lg-6">
+                    <div class="p-5">
+                        <div class="text-center">
+                            <h1 class="h4 text-gray-900 mb-4">Создание
+                                аккаунта</h1>
+                        </div>
+                        <form method="POST" class="user">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <input type="text"
+                                       class="form-control form-control-user"
+                                       id="username"
+                                       name="username"
+                                       placeholder="ФИО">
+                            </div>
+
+                            <div class="form-group">
+                                <input type="email"
+                                       class="form-control form-control-user"
+                                       id="email"
+                                       name="email"
+                                       placeholder="Email">
+                            </div>
+
+                            <div class="form-group">
+                                <input type="text"
+                                       class="form-control form-control-user"
+                                       id="study_group"
+                                       name="study_group"
+                                       placeholder="Номер группы">
+                            </div>
+
+                            <div class="form-group row">
+                                <div class="col-sm-6 mb-3 mb-sm-0">
+                                    <input type="password"
+                                           class="form-control form-control-user"
+                                           id="password"
+                                           name="password1"
+                                           placeholder="Пароль">
+                                </div>
+                                <div class="col-sm-6">
+                                    <input type="password"
+                                           class="form-control form-control-user"
+                                           id="password2"
+                                           name="password2"
+                                           placeholder="Подтверждение пароля">
+                                </div>
+                            </div>
+                            <button type="submit"
+                                    class="btn btn-primary btn-user btn-block">
+                                Зарегистрировать
+                            </button>
+                        </form>
+                        <hr>
+                        <div class="text-center">
+                            <a class="small" href="{% url 'login' %}">У вас уже
+                                есть
+                                аккаунт? Войдите!</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+

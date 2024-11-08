@@ -1,0 +1,16 @@
+FROM python:3.12-slim
+
+RUN adduser --disabled-password --gecos "" user
+
+WORKDIR /app
+
+COPY requirements.txt /app/
+
+RUN python3 -m pip install --upgrade pip wheel setuptools
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . /app/
+
+USER user
+
+CMD ["python", "manage.py", "migrate"]
