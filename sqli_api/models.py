@@ -1,8 +1,22 @@
+import random
 import uuid
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
+
+from sqli_api.config import adjectives, nouns
+
+
+def generate_unique_lab_name() -> str:
+    """
+    Функция генерирует уникальное имя для лабы
+    :return: имя в виде строки 'прилагательное-глагол'
+    """
+    adj = random.choice(adjectives)
+    noun = random.choice(nouns)
+    return f"{adj}-{noun}"
+
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, username, study_group, email, password=None, **extra_fields):
@@ -18,6 +32,7 @@ class CustomUserManager(BaseUserManager):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
         return self.create_user(username, study_group, email, password, **extra_fields)
+
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(_('ФИО'), max_length=150, unique=False)
@@ -38,6 +53,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.email
 
+
 class Lab(models.Model):
     STATUS_CHOICES = [
         ('Создается', 'Создается'),
@@ -48,6 +64,7 @@ class Lab(models.Model):
     ]
 
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    name = models.CharField(default=generate_unique_lab_name)
     uuid = models.UUIDField(unique=True, editable=False, default=uuid.uuid4)
     url = models.URLField(unique=True, blank=True, null=True)
     unique_secret_hash = models.CharField(max_length=1024, unique=True)

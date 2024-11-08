@@ -37,7 +37,7 @@
         }
 
         // Функция для удаления лабораторной работы
-        function deleteLab(labId) {
+        function deleteLab(labId, labName) {
             if (!confirm('Вы уверены, что хотите удалить лабораторную работу?')) {
                 return;
             }
@@ -59,7 +59,7 @@
                     }
                 })
                 .then(data => {
-                    alert(`Лабораторная работа с ID ${data.lab_id} удалена`);
+                    alert(`Лабораторная работа ${labName} удалена`);
                     window.location.reload();
                 })
                 .catch(error => {
@@ -91,8 +91,8 @@
     {% for lab in labs %}
         <li>
             <a href="{% url 'lab_info' lab.id %}">Лабораторная
-                работа {{ lab.uuid }} - {{ lab.status }}</a>
-            <button onclick="deleteLab({{ lab.id }})">Удалить</button>
+                работа {{ lab.name }} - {{ lab.status }}</a>
+            <button onclick="deleteLab({{ lab.id }}, '{{ lab.name }}')">Удалить</button>
             <!-- Кнопка для удаления -->
         </li>
     {% endfor %}
