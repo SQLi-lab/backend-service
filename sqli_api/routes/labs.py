@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseNotAllowed, \
     JsonResponse
 from django.shortcuts import render, get_object_or_404
+from django.core.paginator import Paginator
 
 from sqli_api.models import Lab
 
@@ -14,17 +15,42 @@ def labs(request):
     :param request:
     :return: страница 'labs'
     """
+    sort_by = request.GET.get('sort', 'date_created')
+
     active_labs = Lab.objects.filter(user_id=request.user,
                                      status__in=['Создается',
-                                                 'Создана']).order_by('-id')
+                                                 'Создана']).values("uuid",
+                                                                    "name",
+                                                                    "date_created",
+                                                                    "is_done",
+                                                                    "status").order_by(
+        '-id')
 
     removed_labs = Lab.objects.filter(user_id=request.user,
                                       status__in=['Ошибка создания',
                                                   'Останавливается',
                                                   'Остановлена',
-                                                  'Решена']).order_by('-id')
+                                                  'Решена']).values("uuid",
+                                                                    "name",
+                                                                    "date_created",
+                                                                    "is_done",
+                                                                    "status").order_by(
+        f'-{sort_by}')
+    # Пагинация для архива
+    paginator = Paginator(removed_labs, 8)  # 8 записей на страницу
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
 
-    context = {'active_labs': active_labs, 'removed_labs': removed_labs}
+    # Пагинация для активных работ
+    active_paginator = Paginator(active_labs, 8)  # 6 лабораторных на странице
+    active_page_num = request.GET.get('page_active')
+    active_page_obj = active_paginator.get_page(active_page_num)
+
+    context = {'active_labs': active_labs, 'active_page_obj': active_page_obj, 'removed_labs': removed_labs,
+               'page_obj': page_obj,
+               'user': request.user, 'sort_by': sort_by, 'paginator': paginator,
+               'active_paginator': active_paginator,
+               'page_obj': page_obj, }
 
     return render(request, 'labs/labs.html', context)
 
@@ -60,9 +86,9 @@ def lab_add(request):
 
 
 @login_required
-def lab_delete(request, id):
+def lab_delete(request, uuid):
     if request.method == 'POST':
-        lab = get_object_or_404(Lab, id=id)
+        lab = get_object_or_404(Lab, uuid=uuid)
 
         if lab.user != request.user:
             return JsonResponse(
@@ -73,15 +99,29 @@ def lab_delete(request, id):
         lab.save()
 
         return JsonResponse(
-            {'message': 'Лабораторная работа удалена', 'lab_id': id},
+            {'message': 'Лабораторная работа удалена', 'lab_id': lab.id},
             status=200)
     return HttpResponseNotAllowed(['POST'], 'Метод не поддерживается')
 
 
 @login_required
-def lab_info(request, id):
-    lab = get_object_or_404(Lab, id=id)
+def lab_info(request, uuid):
+    lab = get_object_or_404(Lab, uuid=uuid)
     context = {
         'lab': lab
     }
     return render(request, 'labs/lab_info.html', context)
+
+
+@login_required
+def labs_stats(request):
+    # Пример данных, здесь нужно заменить на реальную логику из базы данных
+    created_count = Lab.objects.filter(user=request.user).count()
+    completed_count = Lab.objects.filter(user=request.user,
+                                         is_done=True).count()
+
+    data = {
+        'created': created_count,
+        'completed': completed_count,
+    }
+    return JsonResponse(data)

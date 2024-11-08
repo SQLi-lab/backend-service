@@ -1,83 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'base/base_login.html' %}
+{% load static %}
+{% block title %}Регистрация{% endblock %}
 
-<head>
-    {% load static %}
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Регистрация</title>
-
-    <!-- Custom fonts and styles -->
-    <link href="{% static 'vendor/fontawesome-free/css/all.min.css' %}"
-          rel="stylesheet" type="text/css">
-    <link href="{% static 'css/sb-admin-2.min.css' %}" rel="stylesheet">
-    <style>
-        .toast-container {
-            position: fixed;
-            top: 1rem;
-            right: 1rem;
-            z-index: 1055;
-        }
-
-        .text-bg-warning {
-            background-color: #ffd580 !important; /* Мягкий желтый */
-            color: #333333 !important; /* Темный текст для контраста */
-        }
-    </style>
-</head>
-
-<body class="bg-gradient-primary">
-<div class="toast-container">
-    {% if messages %}
-        {% for message in messages %}
-            <div class="toast align-items-center text-bg-warning border-0"
-                 role="alert" aria-live="assertive" aria-atomic="true">
-
-                <div class="d-flex">
-                    <div class="toast-body">
-                        {{ message }}
-                    </div>
-                </div>
-            </div>
-        {% endfor %}
-    {% endif %}
-
-
-    {% if form.password2.errors %}
-        <div class="text-danger">
-            {% for error in form.password2.errors %}
-                 <div class="toast align-items-center text-bg-warning border-0"
-                 role="alert" aria-live="assertive" aria-atomic="true">
-
-                <div class="d-flex">
-                    <div class="toast-body">
-                        {{ error }}
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-    {% endif %}
-
-    {% if form.email.errors %}
-        <div class="text-danger">
-            {% for error in form.email.errors %}
-                 <div class="toast align-items-center text-bg-warning border-0"
-                 role="alert" aria-live="assertive" aria-atomic="true">
-
-                <div class="d-flex">
-                    <div class="toast-body">
-                        {{ error }}
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-    {% endif %}
-</div>
-
-<div class="container">
-    <div class="card o-hidden border-0 shadow-lg my-5">
+{% block content %}
+<div class="card o-hidden border-0 shadow-lg my-5">
         <div class="card-body p-0">
             <!-- Nested Row within Card Body -->
             <div class="row">
@@ -149,33 +75,7 @@
             </div>
         </div>
     </div>
-
-</div>
-<footer class="text-center mt-5">
-    <div class="text-white">
-        <p>&copy; 2024. СПбПУ, Высшая школа кибербезопасности.<br> Разработано в
-            помощь преподавателям.</p>
-    </div>
-</footer>
-
-<!-- Scripts -->
-<script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
-<script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+{% endblock %}
 
 
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var toastElList = [].slice.call(document.querySelectorAll('.toast'));
-        var toastList = toastElList.map(function (toastEl) {
-            var toast = new bootstrap.Toast(toastEl, {
-                autohide: true, 
-                delay: 5000    
-            });
-            toast.show();
-            return toast;
-        });
-    });
-</script>
-</body>
 
-</html>
