@@ -88,16 +88,30 @@
 <body>
 <h1>Список лабораторных работ</h1>
 <ul>
-    {% for lab in labs %}
+    {% for lab in active_labs %}
         <li>
             <a href="{% url 'lab_info' lab.id %}">Лабораторная
                 работа {{ lab.name }} - {{ lab.status }}</a>
-            <button onclick="deleteLab({{ lab.id }}, '{{ lab.name }}')">Удалить</button>
-            <!-- Кнопка для удаления -->
+            <button onclick="deleteLab({{ lab.id }}, '{{ lab.name }}')">
+                Удалить
+            </button>
+        </li>
+    {% endfor %}
+
+</ul>
+<button onclick="createLab()">Запустить</button>
+<br>
+
+<h1>История выполнения работ</h1>
+<ul>
+    {% for lab in removed_labs %}
+        <li>
+            <a href="{% url 'lab_info' lab.id %}">Лабораторная
+                работа {{ lab.name }} - {{ lab.status }}</a>
         </li>
     {% endfor %}
 </ul>
 
-<button onclick="createLab()">Создать новую лабораторную работу</button>
+
 </body>
 </html>

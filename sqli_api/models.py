@@ -1,11 +1,12 @@
 import random
 import uuid
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, \
+    PermissionsMixin
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 
-from sqli_api.config import adjectives, nouns
+from sqli_api.config import adjectives, nouns, STATUS_CHOICES
 
 
 def generate_unique_lab_name() -> str:
@@ -19,19 +20,23 @@ def generate_unique_lab_name() -> str:
 
 
 class CustomUserManager(BaseUserManager):
-    def create_user(self, username, study_group, email, password=None, **extra_fields):
+    def create_user(self, username, study_group, email, password=None,
+                    **extra_fields):
         if not email:
             raise ValueError('Email должен быть указан')
         email = self.normalize_email(email)
-        user = self.model(username=username, study_group=study_group, email=email,**extra_fields)
+        user = self.model(username=username, study_group=study_group,
+                          email=email, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, username, study_group, email, password=None, **extra_fields):
+    def create_superuser(self, username, study_group, email, password=None,
+                         **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
-        return self.create_user(username, study_group, email, password, **extra_fields)
+        return self.create_user(username, study_group, email, password,
+                                **extra_fields)
 
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
@@ -43,7 +48,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(_('Активен'), default=True)
     is_staff = models.BooleanField(_('Статус персонала'), default=False)
     is_superuser = models.BooleanField(_('Суперпользователь'), default=False)
-    date_joined = models.DateTimeField(_('Дата регистрации'), default=timezone.now)
+    date_joined = models.DateTimeField(_('Дата регистрации'),
+                                       default=timezone.now)
 
     objects = CustomUserManager()
 
@@ -55,14 +61,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
 
 class Lab(models.Model):
-    STATUS_CHOICES = [
-        ('Создается', 'Создается'),
-        ('Ошибка создания', 'Ошибка создания'),
-        ('Создана', 'Создана'),
-        ('Остановлена', 'Остановлена'),
-        ('Решена', 'Решена'),
-    ]
-
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     name = models.CharField(default=generate_unique_lab_name)
     uuid = models.UUIDField(unique=True, editable=False, default=uuid.uuid4)
