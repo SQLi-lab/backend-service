@@ -28,7 +28,7 @@
                         <span class="icon text-white-50">
                             <i class="fas fa-external-link-alt"></i>
                         </span>
-                                    <span class="text">Перейти к работе</span>
+                                    <span class="text">Перейти</span>
                                 </a>
                             {% endif %}
                         </div>
@@ -50,7 +50,7 @@
                     <div class="card-body text-gray-900">
                         <strong>Создана:</strong> {{ lab.date_created|date:"d.m.Y H:i" }}
                     </div>
-                    {% if lab.date_started is not None and lab.status == 'Выполняется'%}
+                    {% if lab.date_started is not None and lab.status == 'Выполняется' %}
                         <div class="card-body text-gray-900">
                             <strong>Запущена:</strong> {{ lab.date_started|date:"d.m.Y H:i" }}
                         </div>
@@ -63,7 +63,20 @@
                     <div class="card-body text-gray-900">
                         <strong>UUID:</strong> {{ lab.uuid }}
                     </div>
-                
+                    {% if user.is_superuser and is_not_owner %}
+                        <div class="card-body text-gray-900">
+                            <strong>Владелец:</strong> {{ owner.username }}
+                            | <span id="email-text">{{ owner.email }}</span>
+                            <button class="btn btn-outline-secondary btn-sm"
+                                    id="copy-email-btn"
+                                    title="Скопировать email">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+
+
+                    {% endif %}
+
                     {% if lab.status == 'Ошибка создания' %}
                         <div class="card-body text-gray-900">
                             <strong>Ошибка:</strong> {{ lab.error_log }}
@@ -233,6 +246,18 @@
                         window.location.reload();
                     }, 2000);
                 }
+            });
+        </script>
+    {% endif %}
+
+    {% if user.is_superuser %}
+        <script>
+            document.getElementById('copy-email-btn').addEventListener('click', function () {
+                const emailText = document.getElementById('email-text').innerText;
+                navigator.clipboard.writeText(emailText).then(() => {
+                }).catch(err => {
+                    console.error('Ошибка копирования:', err);
+                });
             });
         </script>
     {% endif %}

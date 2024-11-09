@@ -60,6 +60,15 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.email
 
+    @property
+    def lab_completed(self):
+        return Lab.objects.filter(user=self, is_done=True).count() > 0
+
+    @property
+    def labs_created(self):
+        return Lab.objects.filter(user=self).count()
+
+
 
 class Lab(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
