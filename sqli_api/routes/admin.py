@@ -149,3 +149,23 @@ def admin_users_dump(request):
              user.date_joined])
 
     return response
+
+
+@login_required
+def admin_custom_lab(request):
+    # TODO: сделать POST и создать форму, реализовать variant в модели CustomUser
+
+    if not request.user.is_superuser:
+        return render(request, 'pages/401.html')
+
+    if request.method == 'GET':
+        context = {
+
+        }
+
+        return render(request, 'admin/custom_lab.html', context=context)
+
+    return JsonResponse(
+        {'message': 'Лабораторная работа создана'},
+        status=200)
+

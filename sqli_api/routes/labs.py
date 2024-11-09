@@ -1,18 +1,17 @@
 import hashlib
-import json
 import random
+import json
 import uuid
-from datetime import datetime
 
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q
+from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseNotAllowed, \
     JsonResponse
-from django.shortcuts import render, get_object_or_404
+from django.utils.timezone import make_aware
 from django.core.paginator import Paginator
-from django.utils.timezone import make_aware, is_aware
-
+from django.db.models import Q
 from sqli_api.models import Lab
+from datetime import datetime
 
 
 @login_required
@@ -124,10 +123,10 @@ def lab_add(request):
         expired_seconds=expired_seconds
     )
 
-    # TODO: shared_tash creating
+    # TODO: shared_task creating
 
     return JsonResponse(
-        {'message': 'Лабораторная работа создана', 'lab_id': lab.id},
+        {'message': 'Лабораторная работа создана'},
         status=200)
 
 
@@ -141,7 +140,8 @@ def lab_delete(request, uuid):
     if lab.user != request.user:
         return render(request, 'pages/401.html')
 
-    # TODO: shared_tash
+    # TODO: shared_task
+    # TODO: отложенная задача завершения лаыбы + статус
     lab.status = 'Останавливается'
     lab.save()
 
@@ -204,7 +204,7 @@ def lab_check(request, uuid):
     #     return JsonResponse(
     #         {'message': 'Данные верны'}, status=200)
 
-    # TODO: отложенная задача завершения лаыбы + статус
+
     if secret == lab.secret_hash:
         return JsonResponse(
             {'message': 'Данные верны', 'status': 'success'}, status=200)

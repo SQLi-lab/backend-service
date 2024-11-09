@@ -1,11 +1,9 @@
-from django.contrib import messages
+from sqli_api.forms import CustomLoginForm, CustomUserCreationForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.hashers import make_password
 from django.shortcuts import redirect, render
-
-from sqli_api.forms import CustomLoginForm, CustomUserCreationForm
-from sqli_api.models import CustomUserManager, CustomUser
+from sqli_api.models import CustomUser
+from django.contrib import messages
 
 
 def login_view(request):
