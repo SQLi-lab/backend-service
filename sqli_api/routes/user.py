@@ -25,7 +25,7 @@ def my_account(request):
 
     user_labs = Lab.objects.filter(user_id=user.id)
     all_labs = user_labs.count()
-    active_labs = user_labs.filter(status__in=["Создается", "Создана"]).count()
+    active_labs = user_labs.filter(status__in=["Создается", "Выполняется"]).count()
     done_labs = user_labs.filter(is_done=True).count()
 
     context = {"user": user, "role": GROUP_MAP[user.group],

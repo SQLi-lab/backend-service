@@ -1,8 +1,240 @@
-<h1>Подробная информация о лабораторной работе</h1>
-<p>UUID: {{ lab.uuid }}</p>
-<p>URL: {{ lab.url }}</p>
-<p>Уникальный хеш: {{ lab.unique_secret_hash }}</p>
-<p>Статус: {{ lab.status }}</p>
-<p>Дата создания: {{ lab.date_created }}</p>
-<p>Дата завершения: {{ lab.date_done }}</p>
-<a href="{% url 'labs' %}">Назад к списку</a>
+{% extends 'base/base.html' %}
+{% load static %}
+{% block title %}Лабораторная {{ lab.name }}{% endblock %}
+
+{% block content %}
+    <div class="container-fluid">
+        <!-- Content Row -->
+        <a href="{% url 'labs' %}" class="btn btn-light btn-icon-split">
+                                        <span class="icon text-gray-600">
+                                            <i class="fas fa-arrow-left"></i>
+                                        </span>
+            <span class="text">Назад к списку</span>
+        </a>
+
+
+        <div class="row">
+            <div class="col-lg-6 mb-4">
+                <br>
+                <div class="card bg-light text shadow">
+
+                    <div class="card-body text-primary">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <h3 class="mb-0">Лабораторная {{ lab.name }}</h3>
+
+                            {% if lab.status == 'Выполняется' %}
+                                <a href="#"
+                                   class="btn btn-primary btn-icon-split btn-sm">
+                        <span class="icon text-white-50">
+                            <i class="fas fa-external-link-alt"></i>
+                        </span>
+                                    <span class="text">Перейти к работе</span>
+                                </a>
+                            {% endif %}
+                        </div>
+
+                        <div class="
+                    {% if lab.status == 'Ошибка создания' %}
+                        text-danger
+                    {% elif lab.status == 'Создается' or lab.status == 'Выполняется' %}
+                        text-primary
+                    {% else %}
+                        text-secondary
+                    {% endif %}
+                    mb-0
+                ">
+                            {{ lab.status }}
+                        </div>
+                    </div>
+
+                    <div class="card-body text-gray-900">
+                        <strong>Создана:</strong> {{ lab.date_created|date:"d.m.Y H:i" }}
+                    </div>
+                    {% if lab.date_started is not None and lab.status == 'Выполняется'%}
+                        <div class="card-body text-gray-900">
+                            <strong>Запущена:</strong> {{ lab.date_started|date:"d.m.Y H:i" }}
+                        </div>
+                    {% endif %}
+                    {% if lab.date_done is not None and lab.is_done %}
+                        <div class="card-body text-gray-900">
+                            <strong>Решена:</strong> {{ lab.date_done|date:"d.m.Y H:i" }}
+                        </div>
+                    {% endif %}
+                    <div class="card-body text-gray-900">
+                        <strong>UUID:</strong> {{ lab.uuid }}
+                    </div>
+                
+                    {% if lab.status == 'Ошибка создания' %}
+                        <div class="card-body text-gray-900">
+                            <strong>Ошибка:</strong> {{ lab.error_log }}
+                        </div>
+                    {% endif %}
+
+                    <div class="card-body text-primary">
+                        <div class="d-flex justify-content-between align-items-start">
+                            {% if lab.is_done %}
+                                <div class="text-success">
+                                    Выполнена
+                                </div>
+                            {% else %}
+                                <div class="text-gray-600">
+                                    Не выполнена
+                                </div>
+                            {% endif %}
+
+
+                            {% if lab.status == 'Выполняется' %}
+                                <div id="timer"
+                                     class="h5 text-primary font-weight-bold"
+                                     title="Оставшееся время до завершения работы">
+                                    {{ remaining_seconds }}
+                                </div>
+                            {% endif %}
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% if lab.status == 'Выполняется' %}
+            <hr>
+            <br>
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            Добавить ответ</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="input-group">
+                            <input type="text"
+                                   class="form-control bg-light border-0 small"
+                                   placeholder="Введите найденный секрет..."
+                                   id="secretInput">
+                            <div class="input-group-append">
+                                <button class="btn btn-primary" type="button"
+                                        id="submitButton">
+                                    <i class=" fas fa-plus fa-sm
+                                "></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    </div>
+    <!-- Footer -->
+    <footer class="sticky-footer bg-white">
+        <div class="container my-auto">
+            <div class="copyright text-center my-auto">
+                <span>&copy; 2024. СПбПУ, Высшая школа кибербезопасности.<br>Разработано в помощь преподавателям.</span>
+            </div>
+        </div>
+    </footer>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const timerElement = document.getElementById("timer");
+            let remainingSeconds = parseInt(timerElement.textContent);
+
+            if (!isNaN(remainingSeconds) && remainingSeconds > 0) {
+                const updateTime = () => {
+                    if (remainingSeconds > 0) {
+                        remainingSeconds--;
+
+                        const hours = Math.floor(remainingSeconds / 3600);
+                        const minutes = Math.floor((remainingSeconds % 3600) / 60);
+                        const seconds = remainingSeconds % 60;
+
+                        timerElement.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                    } else {
+                        timerElement.textContent = "00:00:00";
+                    }
+                };
+
+                // Обновляем каждую секунду
+                setInterval(updateTime, 1000);
+                updateTime();
+            }
+        });
+    </script>
+
+    {% if lab.status == 'Выполняется' %}
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const secretInput = document.getElementById('secretInput');
+                const submitButton = document.getElementById('submitButton');
+
+                submitButton.addEventListener('click', function () {
+                    const secret = secretInput.value.trim();
+
+                    if (secret === "") {
+                        setInputStyle(secretInput, 'yellow');
+                        fadeOutStyle(secretInput, 2000);
+                        return;
+                    }
+
+                    fetch("{% url 'lab_check' lab.uuid %}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token }}',
+                        },
+                        body: JSON.stringify({secret: secret})
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === 'success') {
+                                setInputStyle(secretInput, 'green');
+                            } else {
+                                setInputStyle(secretInput, 'red');
+                            }
+                            fadeOutStyle(secretInput, 2000);
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            setInputStyle(secretInput, 'red');
+                            fadeOutStyle(secretInput, 2000);
+                        });
+                });
+
+                secretInput.addEventListener('input', function () {
+                    resetInputStyle(secretInput);
+                });
+
+                function setInputStyle(element, color) {
+                    element.style.boxShadow = `0 0 10px ${color}`;
+                }
+
+                function resetInputStyle(element) {
+                    element.style.outline = '';
+                    element.style.boxShadow = '';
+                }
+
+                function fadeOutStyle(element, duration) {
+                    let opacity = 1;
+                    const interval = 50;
+                    const step = interval / duration;
+
+                    setTimeout(() => {
+                        const fadeEffect = setInterval(() => {
+                            if (opacity <= 0) {
+                                clearInterval(fadeEffect);
+                                resetInputStyle(element);
+                            } else {
+                                opacity -= step;
+                                element.style.outlineColor = `rgba(255, 255, 0, ${opacity})`;
+                            }
+                        }, interval);
+                        window.location.reload();
+                    }, 2000);
+                }
+            });
+        </script>
+    {% endif %}
+
+{% endblock %}

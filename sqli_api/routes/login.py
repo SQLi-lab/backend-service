@@ -44,7 +44,7 @@ def register_view(request):
                                            email=email,
                                            password=password,
                                            study_group=study_group)
-            messages.success(request, "Ваш аккаунт успешно создан! Вы можете войти.")
+            messages.success(request, "Ваш аккаунт успешно создан! Дождитесь подтверждения преподавателя.")
             return redirect('login')
 
         else:
@@ -55,11 +55,6 @@ def register_view(request):
 
     return render(request, 'accounts/register.html', {'form': form})
 
-@login_required
-def check_user(request):
-    user = request.user
-    is_verified = user.verified
-    return render(request, 'accounts/check_user.html', {'is_verified': is_verified})
 
 @login_required
 def logout_view(request):
