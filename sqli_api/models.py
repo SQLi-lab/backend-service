@@ -41,6 +41,7 @@ class CustomUserManager(BaseUserManager):
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(_('ФИО'), max_length=150, unique=False)
+    uuid = models.UUIDField(unique=True, editable=False, default=uuid.uuid4)
     study_group = models.CharField(_('Номер группы'), max_length=50)
     group = models.CharField(_('Группа'), max_length=120, default='student')
     email = models.EmailField(_('email'), unique=True)
@@ -59,19 +60,29 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.email
 
+    @property
+    def lab_completed(self):
+        return Lab.objects.filter(user=self, is_done=True).count() > 0
+
+    @property
+    def labs_created(self):
+        return Lab.objects.filter(user=self).count()
+
+
 
 class Lab(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     name = models.CharField(default=generate_unique_lab_name)
     uuid = models.UUIDField(unique=True, editable=False, default=uuid.uuid4)
     url = models.URLField(unique=True, blank=True, null=True)
-    unique_secret_hash = models.CharField(max_length=1024, unique=True)
-
+    secret_hash = models.CharField(max_length=1024, unique=False)
     expired_seconds = models.IntegerField(null=False)
     date_created = models.DateTimeField(auto_now_add=True)
+    date_started = models.DateTimeField(auto_now_add=False, null=True)
     is_done = models.BooleanField(default=False)
     date_done = models.DateTimeField(blank=True, null=True)
 
     status = models.CharField(choices=STATUS_CHOICES,
                               default='Создается',
                               max_length=50)
+    error_log = models.TextField(null=True, blank=True)

@@ -1,11 +1,9 @@
-from django.contrib import messages
+from sqli_api.forms import CustomLoginForm, CustomUserCreationForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.hashers import make_password
 from django.shortcuts import redirect, render
-
-from sqli_api.forms import CustomLoginForm, CustomUserCreationForm
-from sqli_api.models import CustomUserManager, CustomUser
+from sqli_api.models import CustomUser
+from django.contrib import messages
 
 
 def login_view(request):
@@ -15,11 +13,14 @@ def login_view(request):
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
             user = authenticate(request, username=username, password=password)
-            if user is not None:
-                login(request, user)
-                return redirect('labs')
+            if not user.verified:
+                messages.error(request, "Аккаунт не подтвержден! Дождитесь одобрения преподавателя.")
             else:
-                messages.error(request, 'Ошибка авторизации!')
+                if user is not None:
+                    login(request, user)
+                    return redirect('labs')
+                else:
+                    messages.error(request, 'Ошибка авторизации!')
         else:
             messages.error(request, 'Неверный логин или пароль!')
     else:
@@ -41,7 +42,7 @@ def register_view(request):
                                            email=email,
                                            password=password,
                                            study_group=study_group)
-            messages.success(request, "Ваш аккаунт успешно создан! Вы можете войти.")
+            messages.success(request, "Ваш аккаунт успешно создан! Дождитесь подтверждения преподавателя.")
             return redirect('login')
 
         else:
@@ -52,11 +53,6 @@ def register_view(request):
 
     return render(request, 'accounts/register.html', {'form': form})
 
-@login_required
-def check_user(request):
-    user = request.user
-    is_verified = user.verified
-    return render(request, 'accounts/check_user.html', {'is_verified': is_verified})
 
 @login_required
 def logout_view(request):

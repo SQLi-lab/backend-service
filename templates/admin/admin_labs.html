@@ -1,0 +1,220 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Лабораторные работы{% endblock %}
+
+{% block content %}
+    <div class="container-fluid">
+        <h1 class="h3 mb-2 text-gray-900">Информация о лабораторных работах</h1>
+        <p class="mb-4 text-gray-800">Через данную панель администратор может
+            просматривать суествующие лабораторные работы в системе. Если работа
+            подсвечена синим - она выполняется. Если работа
+            подсвечена зеленым - она выполнена. Если работа
+            подсвечена красным - возникла ошибка при создании.</p>
+
+        <div class="card shadow mb-4">
+            <div class="d-flex justify-content-between align-items-start align-items-center">
+                <div class="card-body col-sm-12 col-md-4">
+                    <div id="dataTable_filter"
+                         class="dataTables_filter text-gray-800">
+                        <label for="search-input" class="d-block">Поиск:</label>
+                        <div class="d-flex align-items-center gap-3">
+                            <input type="text" id="search-input"
+                                   value="{{ request.GET.search }}"
+                                   class="form-control form-control-sm w-50"
+                                   placeholder="Название, статус, UUID">
+                            <a href="{% url 'admin_labs' %}"
+                               class="btn btn-secondary btn-sm">Сбросить</a>
+                        </div>
+                    </div>
+                </div>
+
+                <a href="{% url 'admin_labs_dump' %}"
+                   class="btn btn-primary btn-sm" style="margin-right: 20px;">
+                    <i class="fas fa-download"></i> Дамп БД лабораторных
+                </a>
+            </div>
+
+
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered text-gray-800"
+                           width="100%"
+                           cellspacing="0">
+                        <thead>
+                        <tr>
+                            <th>Название</th>
+                            <th>Статус</th>
+                            <th>Выполнена</th>
+                            <th>Ссылка</th>
+                            <th>Дата создания</th>
+                            <th>Дата запуска</th>
+                            <th>Дата завершения</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for lab in page_obj %}
+                            <tr class="
+                                {% if lab.status == 'Выполняется' %}
+                                    table-info
+                                {% elif lab.status == 'Ошибка создания' %}
+                                    table-danger
+                                {% elif lab.is_done %}
+                                    table-success
+                                {% endif %}
+                            ">
+
+                                <td><a href="{% url 'lab_info' lab.uuid %}">
+                                    {{ lab.name }}
+                                </a></td>
+                                <td>{{ lab.status }}</td>
+                                <td>{{ lab.is_done|yesno:"Да,Нет" }}</td>
+                                <td>
+                                    {% if lab.status == 'Выполняется' %}
+                                        <a href="{{ lab.url }}"
+                                           class="btn btn-primary btn-icon-split btn-sm">
+                        <span class="icon text-white-50">
+                            <i class="fas fa-external-link-alt"></i>
+                        </span>
+                                            <span class="text">Перейти</span>
+                                        </a>
+                                    {% endif %}</td>
+                                <td>{{ lab.date_created|date:"d.m.Y H:i" }}</td>
+                                <td>{{ lab.date_started|date:"d.m.Y H:i" }}</td>
+                                <td>{{ lab.date_done|date:"d.m.Y H:i" }}</td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center">Нет
+                                    лабораторных
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {% if show_pag %}
+                    <!-- Пагинация -->
+                    <div class="d-flex justify-content-center">
+                        <nav aria-label="Pagination">
+                            <ul class="pagination">
+                                {% if page_obj.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link"
+                                           href="?page={{ page_obj.previous_page_number }}">Предыдущая</a>
+                                    </li>
+                                {% endif %}
+                                {% for num in page_obj.paginator.page_range %}
+                                    <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                                        <a class="page-link"
+                                           href="?page={{ num }}">{{ num }}</a>
+                                    </li>
+                                {% endfor %}
+                                {% if page_obj.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link"
+                                           href="?page={{ page_obj.next_page_number }}">Следующая</a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+    </div>
+    <!-- Footer -->
+    <footer class="sticky-footer bg-white">
+        <div class="container my-auto">
+            <div class="copyright text-center my-auto">
+                <span>&copy; 2024. СПбПУ, Высшая школа кибербезопасности.<br>Разработано в помощь преподавателям.</span>
+            </div>
+        </div>
+    </footer>
+    </div>
+
+
+    <!-- End of Footer -->
+    <!-- End of Page Wrapper -->
+
+    </div>
+
+    <script>
+        let searchTimeout;
+        const searchInput = document.getElementById('search-input');
+
+        searchInput.addEventListener('input', function () {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                const query = searchInput.value;
+                const params = new URLSearchParams(window.location.search);
+                params.set('search', query);
+                params.set('page', 1);
+                window.location.search = params.toString();
+            }, 800);
+        });
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const verifyButtons = document.querySelectorAll('.verify-btn');
+
+            verifyButtons.forEach(function (button) {
+                button.addEventListener('click', function () {
+                    const uuid = button.getAttribute('data-uuid');
+                    fetch(`/admin/users/${uuid}/verify`, {
+                        method: 'GET',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === 'success') {
+                                window.location.reload()
+                            } else {
+                                alert('Ошибка: ' + data.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Ошибка:', error);
+                            alert('Ошибка в процессе верификации');
+                        });
+                });
+            });
+        });
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const verifyButtons = document.querySelectorAll('.delete-btn');
+
+            verifyButtons.forEach(function (button) {
+                button.addEventListener('click', function () {
+                    const uuid = button.getAttribute('data-uuid');
+                    fetch(`/admin/users/${uuid}/delete`, {
+                        method: 'GET',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === 'success') {
+                                window.location.reload()
+                            } else {
+                                alert('Ошибка: ' + data.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Ошибка:', error);
+                            alert('Ошибка в процессе удаления');
+                        });
+                });
+            });
+        });
+    </script>
+{% endblock %}

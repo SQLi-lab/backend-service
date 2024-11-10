@@ -8,8 +8,9 @@ def create_superuser(apps, schema_editor):
             username="Главный Админ",
             study_group="Преподаватель",
             group="admin",
+            verified=True,
             email="admin@admin.com",
-            password=make_password("admin"),  # Hash the password
+            password=make_password("admin"),
             is_staff=True,
             is_superuser=True
         )
