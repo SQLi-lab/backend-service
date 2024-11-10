@@ -170,7 +170,7 @@ def lab_delete(request, uuid):
     }
 
     try:
-        response = requests.delete(f'{DEPLOY_URL}/lab/delete', json=data)
+        response = requests.post(f'{DEPLOY_URL}/lab/delete', json=data)
     except Exception as e:
         lab.status = 'Ошибка удаления'
         lab.error_log = 'Ошибка удаления лабораторной работы, сервер не доступен'

@@ -387,6 +387,7 @@
                         .catch(error => {
                             console.error(error);
                             alert('Ошибка удаления лабы: ' + error.message);
+                            window.location.reload();
                         })
                         .finally(() => {
                             $('#deleteLabModal').modal('hide');
