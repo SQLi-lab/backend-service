@@ -239,13 +239,6 @@ def lab_check(request, uuid):
     if lab.is_done:
         return JsonResponse(
             {'message': 'Данные верны', 'status': 'success'}, status=200)
-    # TODO: uncomment
-    # if hashlib.sha256(secret.encode('utf-8')) == lab.secret_hash:
-    #     lab.date_done = make_aware(datetime.now())
-    #     lab.is_done = True
-    #     lab.save()
-    #     return JsonResponse(
-    #         {'message': 'Данные верны'}, status=200)
 
     if secret == lab.secret_hash:
         lab.date_done = make_aware(datetime.now())
