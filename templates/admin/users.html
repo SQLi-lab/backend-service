@@ -1,0 +1,222 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Пользователи системы{% endblock %}
+
+{% block content %}
+    <div class="container-fluid">
+        <h1 class="h3 mb-2 text-gray-900">Управление пользователями</h1>
+        <p class="mb-4 text-gray-800">Через данную панель администратор может
+            просматривать
+            пользователей системы и активировать их. Если пользователь подсвечен
+            зеленым - он выполнил лабораторную. Если пользователь
+            подсвечен желтым - он не активирован. Сначала указываются
+            неверифицированные пользоватли.</p>
+
+
+        <div class="card shadow mb-4">
+            <div class="d-flex justify-content-between align-items-start align-items-center">
+                <div class="card-body col-sm-12 col-md-4">
+                    <div id="dataTable_filter"
+                         class="dataTables_filter text-gray-800">
+                        <label for="search-input" class="d-block">Поиск:</label>
+                        <div class="d-flex align-items-center gap-3">
+                            <input type="text" id="search-input"
+                                   value="{{ request.GET.search }}"
+                                   class="form-control form-control-sm w-50"
+                                   placeholder="Фамилия, Email, группа, UUID">
+                            <br>
+                            <a href="{% url 'admin_users' %}"
+                               class="btn btn-secondary btn-sm">Сбросить</a>
+                        </div>
+                    </div>
+                </div>
+                <a href="{% url 'admin_users_dump' %}"
+                   class="btn btn-primary btn-sm" style="margin-right: 20px;">
+                    <i class="fas fa-download"></i> Дамп БД пользователей
+                </a>
+            </div>
+
+
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered text-gray-800"
+                           width="100%"
+                           cellspacing="0">
+                        <thead>
+                        <tr>
+                            <th>Подтвержден</th>
+                            <th>ФИО</th>
+                            <th>Номер группы</th>
+                            <th>Email</th>
+                            <th>Зрегистрирован</th>
+                            <th>Работа выполнена</th>
+                            <th>Число попыток</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for user in page_obj %}
+                            <tr class="
+                                {% if user.lab_completed %}
+                                    table-success
+                                {% elif not user.verified %}
+                                    table-warning
+                                {% endif %}
+                            ">
+                                <td>
+                                    {{ user.verified|yesno:"Да,Нет" }}
+                                    {% if not user.verified %}
+                                        <button class="btn btn-success btn-circle btn-sm verify-btn"
+                                                data-uuid="{{ user.uuid }}"
+                                                title="Подтвердить пользователя">
+                                            <i class="fas fa-user-check"></i>
+                                        </button>
+                                        <button class="btn btn-danger btn-circle btn-sm delete-btn"
+                                                data-uuid="{{ user.uuid }}"
+                                                title="Удалить пользователя">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    {% endif %}
+                                </td>
+                                <td>{{ user.username }}</td>
+                                <td>{{ user.study_group }}</td>
+                                <td>{{ user.email }}</td>
+                                <td>{{ user.date_joined|date:"d.m.Y H:i" }}</td>
+                                <td>{{ user.lab_completed|yesno:"Да,Нет" }}</td>
+                                <td>{{ user.labs_created }}</td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center">Нет
+                                    пользователей
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {% if show_pag %}
+                    <!-- Пагинация -->
+                    <div class="d-flex justify-content-center">
+                        <nav aria-label="Pagination">
+                            <ul class="pagination">
+                                {% if page_obj.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link"
+                                           href="?page={{ page_obj.previous_page_number }}">Предыдущая</a>
+                                    </li>
+                                {% endif %}
+                                {% for num in page_obj.paginator.page_range %}
+                                    <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                                        <a class="page-link"
+                                           href="?page={{ num }}">{{ num }}</a>
+                                    </li>
+                                {% endfor %}
+                                {% if page_obj.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link"
+                                           href="?page={{ page_obj.next_page_number }}">Следующая</a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+    </div>
+    <!-- Footer -->
+    <footer class="sticky-footer bg-white">
+        <div class="container my-auto">
+            <div class="copyright text-center my-auto">
+                <span>&copy; 2024. СПбПУ, Высшая школа кибербезопасности.<br>Разработано в помощь преподавателям.</span>
+            </div>
+        </div>
+    </footer>
+    </div>
+
+
+    <!-- End of Footer -->
+    <!-- End of Page Wrapper -->
+
+    </div>
+
+    <script>
+        let searchTimeout;
+        const searchInput = document.getElementById('search-input');
+
+        searchInput.addEventListener('input', function () {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                const query = searchInput.value;
+                const params = new URLSearchParams(window.location.search);
+                params.set('search', query);
+                params.set('page', 1);
+                window.location.search = params.toString();
+            }, 800);
+        });
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const verifyButtons = document.querySelectorAll('.verify-btn');
+
+            verifyButtons.forEach(function (button) {
+                button.addEventListener('click', function () {
+                    const uuid = button.getAttribute('data-uuid');
+                    fetch(`/admin/users/${uuid}/verify`, {
+                        method: 'GET',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === 'success') {
+                                window.location.reload()
+                            } else {
+                                alert('Ошибка: ' + data.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Ошибка:', error);
+                            alert('Ошибка в процессе верификации');
+                        });
+                });
+            });
+        });
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const verifyButtons = document.querySelectorAll('.delete-btn');
+
+            verifyButtons.forEach(function (button) {
+                button.addEventListener('click', function () {
+                    const uuid = button.getAttribute('data-uuid');
+                    fetch(`/admin/users/${uuid}/delete`, {
+                        method: 'GET',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === 'success') {
+                                window.location.reload()
+                            } else {
+                                alert('Ошибка: ' + data.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Ошибка:', error);
+                            alert('Ошибка в процессе удаления');
+                        });
+                });
+            });
+        });
+    </script>
+{% endblock %}

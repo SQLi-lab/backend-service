@@ -1,0 +1,436 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block title %}Лабораторные работы{% endblock %}
+
+{% block content %}
+    <div class="modal fade" id="deleteLabModal" tabindex="-1"
+         aria-labelledby="deleteLabLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content  text-gray-800">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteLabLabel">Удаление
+                        лабораторной работы</h5>
+                    <button class="close" type="button" data-dismiss="modal"
+                            aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Вы уверены, что хотите удалить лабораторную работу <span
+                        id="labName"></span>?
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button"
+                            data-dismiss="modal">Отмена
+                    </button>
+                    <button class="btn btn-danger" id="confirmDeleteButton">
+                        Удалить
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Begin Page Content -->
+    <div class="container-fluid">
+        <!-- Content Row -->
+        <div class="row">
+            <!-- Approach -->
+            <div class="col-xl-8 col-lg-5">
+                <div class="shadow mb-4">
+                    <div class="card-header py-3 d-flex align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-primary">Активные
+                            лабораторные</h6>
+                        {% if user.is_superuser and active_labs.exists %}
+                            <button class="btn btn-primary"
+                                    onclick="createLab()">
+                                Создать лабораторную
+                            </button>
+                        {% endif %}
+                    </div>
+
+                    <div class="card-body">
+                        {% if not active_labs.exists %}
+                            <div class="col-xl-3 col-lg-5 alert alert-warning"
+                                 role="alert">
+                                Нет активных лабораторных
+                            </div>
+                            <button class="btn btn-primary"
+                                    onclick="createLab()">Создать лабораторную
+                            </button>
+                        {% else %}
+
+
+                            <div class="row">
+                                {% for lab in active_page_obj %}
+                                    <!-- Earnings (Monthly) Card Example -->
+                                    <div class="col-xl-3 col-md-6 mb-4">
+                                        <div class="lab-link">
+                                            <a href="{% url 'lab_info' lab.uuid %}"
+                                               class="text-decoration-none">
+                                                <div class="card border-left-primary shadow h-100 py-2">
+                                                    <div class="card-body">
+                                                        <div class="row no-gutters align-items-center">
+                                                            <div class="col mr-2">
+                                                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                                                    {{ lab.name }}
+                                                                </div>
+                                                                <div class="text-xs font-weight-bold text-gray-500 mb-1">
+                                                                    Создана: {{ lab.date_created|date:"d.m.Y H:i" }}
+
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-auto">
+                                                                <button class="btn btn-danger btn-sm"
+                                                                        onclick="showDeleteLabModal('{{ lab.uuid }}', '{{ lab.name }}')">
+                                                                    <i class="fas fa-trash-alt"></i>
+                                                                </button>
+
+                                                            </div>
+
+
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+
+                                            </a>
+                                        </div>
+
+                                    </div>
+                                {% endfor %}
+
+
+                            </div>
+                            {% if user.is_superuser and show_pag_active %}
+                                <!-- Пагинация для активных лабораторных работ -->
+                                <nav aria-label="Page navigation">
+                                    <ul class="pagination justify-content-center">
+                                        {% if active_page_obj.has_previous %}
+                                            <li class="page-item">
+                                                <a class="page-link"
+                                                   href="?page_active={{ active_page_obj.previous_page_number }}"
+                                                   aria-label="Previous">
+                                                    <span aria-hidden="true">&laquo;</span>
+                                                </a>
+                                            </li>
+                                        {% endif %}
+                                        {% for num in active_paginator.page_range %}
+                                            <li class="page-item {% if active_page_obj.number == num %}active{% endif %}">
+                                                <a class="page-link"
+                                                   href="?page_active={{ num }}">{{ num }}</a>
+                                            </li>
+                                        {% endfor %}
+                                        {% if active_page_obj.has_next %}
+                                            <li class="page-item">
+                                                <a class="page-link"
+                                                   href="?page_active={{ active_page_obj.next_page_number }}"
+                                                   aria-label="Next">
+                                                    <span aria-hidden="true">&raquo;</span>
+                                                </a>
+                                            </li>
+                                        {% endif %}
+                                    </ul>
+                                </nav>
+                            {% endif %}
+
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Pie Chart -->
+            <div class="col-xl-4 col-lg-7">
+                <div class="shadow mb-4">
+                    <!-- Card Header - Dropdown -->
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-primary">Статистика
+                            выполнения</h6>
+                    </div>
+                    <!-- Card Body -->
+                    <div class="card-body">
+                        <div class="chart-pie pt-4 pb-2">
+                            <canvas id="myPieChart"></canvas>
+                        </div>
+                        <div class="mt-4 text-center small">
+                    <span class="mr-2">
+                        <i class="fas fa-circle text-primary"></i> Создано
+                    </span>
+                            <span class="mr-2">
+                        <i class="fas fa-circle text-success"></i> Выполнено
+                    </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <hr class="sidebar-divider">
+
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <h1 class="h3 mb-0 text-gray-800">Архив работ</h1>
+        </div>
+
+
+        <div class="dataTables_length">
+            <label>Сортировать по:
+                <select class="custom-select custom-select-sm form-control-sm"
+                        id="sortSelect" aria-controls="dataTable"
+                        onchange="updateSort()">
+                    <option value="date_created"
+                            {% if sort_by == 'date_created' %}selected{% endif %}>
+                        Дате
+                        создания
+                    </option>
+                    <option value="is_done"
+                            {% if sort_by == 'is_done' %}selected{% endif %}>
+                        Выполнению
+                    </option>
+                </select>
+            </label>
+        </div>
+        <p></p>
+
+
+        <div class="row">
+            {% if not removed_labs.exists %}
+                <div class="col-xl-3 col-lg-5 alert alert-warning"
+                     role="alert">
+                    Архив пуст
+                </div>
+            {% else %}
+                {% for lab in page_obj %}
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <a href="{% url 'lab_info' lab.uuid %}"
+                           class="text-decoration-none">
+                            {% if lab.is_done %}
+                                <div class="card border-left-success shadow h-100 py-2">
+                                    <div class="card-body">
+                                        <div class="text-xs font-weight-bold text-su text-uppercase mb-1">
+                                            {{ lab.name }}
+                                        </div>
+                                        <div class="text-xs font-weight-bold text-gray-500 mb-1">
+                                            Создана: {{ lab.date_created|date:"d.m.Y H:i" }}
+                                        </div>
+
+                                        <div class="text-xs font-weight-bold text-success mb-1">
+                                            Выполнена
+                                        </div>
+
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="card border-left-secondary shadow h-100 py-2">
+                                    <div class="card-body">
+                                        <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">
+                                            {{ lab.name }}
+                                        </div>
+                                        <div class="text-xs font-weight-bold text-gray-500 mb-1">
+                                            Создана: {{ lab.date_created|date:"d.m.Y H:i" }}
+                                        </div>
+
+                                        <div class="text-xs font-weight-bold text-gray-500 mb-1">
+                                            Не выполнена
+                                        </div>
+
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </a>
+                    </div>
+                {% endfor %}
+
+                </div>
+                <!-- Пагинация -->
+                {% if show_pag %}
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link"
+                                       href="?page={{ page_obj.previous_page_number }}&sort={{ sort_by }}"
+                                       aria-label="Previous">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+                            {% for num in paginator.page_range %}
+                                <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                                    <a class="page-link"
+                                       href="?page={{ num }}&sort={{ sort_by }}">{{ num }}</a>
+                                </li>
+                            {% endfor %}
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link"
+                                       href="?page={{ page_obj.next_page_number }}&sort={{ sort_by }}"
+                                       aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+
+            {% endif %}
+
+
+        <!-- /.container-fluid -->
+        <script>
+            // Функция для создания лабораторной работы
+            function createLab() {
+                fetch('/labs/add/', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'Content-Type': 'application/json'
+                    },
+                })
+                    .then(response => {
+                        if (response.status !== 200) {
+                            return response.json().then(errorData => {
+                                throw new Error(errorData.message || 'Ошибка при создании лабораторной работы');
+                            });
+                        } else {
+                            return response.json();
+                        }
+                    })
+                    .then(data => {
+                        window.location.reload();
+                    })
+                    .catch(error => {
+                        console.error(error);
+                        alert('Ошибка создания лабы: ' + error.message);
+                    });
+            }
+
+            // Функция для получения CSRF токена
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+        </script>
+
+        <script>
+            function updateSort() {
+                const sortValue = document.getElementById('sortSelect').value;
+                const currentUrl = new URL(window.location.href);
+                currentUrl.searchParams.set('sort', sortValue);
+                window.location.href = currentUrl.toString();
+            }
+
+            // Добавление эффекта подсветки карточки
+            document.querySelectorAll('.card').forEach(function (card) {
+                card.addEventListener('mouseenter', function () {
+                    card.classList.add('highlighted');
+                });
+                card.addEventListener('mouseleave', function () {
+                    card.classList.remove('highlighted');
+                });
+            });
+        </script>
+        <style>
+            .card {
+                transition: background-color 0.3s ease-in;
+            }
+
+            .card.highlighted {
+                background-color: #f7fbff;
+            }
+        </style>
+        <script>
+            let selectedLabId = null;
+
+            function showDeleteLabModal(labId, labName) {
+                event.preventDefault();
+                selectedLabId = labId;
+                document.getElementById('labName').textContent = labName;
+                $('#deleteLabModal').modal('show');
+            }
+
+            document.getElementById('confirmDeleteButton').addEventListener('click', function () {
+                event.preventDefault();
+                if (selectedLabId) {
+                    fetch(`/labs/${selectedLabId}/delete`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken'),
+                            'Content-Type': 'application/json'
+                        },
+                    })
+                        .then(response => {
+                            if (response.status !== 200) {
+                                return response.json().then(errorData => {
+                                    throw new Error(errorData.message || 'Ошибка при удалении лабораторной работы!');
+                                });
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            window.location.reload();
+                        })
+                        .catch(error => {
+                            console.error(error);
+                            alert('Ошибка удаления лабы: ' + error.message);
+                        })
+                        .finally(() => {
+                            $('#deleteLabModal').modal('hide');
+                        });
+                }
+            });
+
+        </script>
+    </div>
+
+    {% if not removed_labs.exists %}
+        </div>
+
+
+        <!-- End of Footer -->
+        <!-- End of Page Wrapper -->
+        </div>
+        <!-- Footer -->
+        <footer class="sticky-footer bg-white">
+            <div class="container my-auto">
+                <div class="copyright text-center my-auto">
+                    <span>2024. СПбПУ, Высшая школа кибербезопасности.<br>Разработано в помощь преподавателям.</span>
+                </div>
+            </div>
+        </footer>
+    {% else %}
+</div>
+        <!-- Footer -->
+        <footer class="sticky-footer bg-white">
+            <div class="container my-auto">
+                <div class="copyright text-center my-auto">
+                    <span>&copy; 2024. СПбПУ, Высшая школа кибербезопасности.<br>Разработано в помощь преподавателям.</span>
+                </div>
+            </div>
+        </footer>
+        </div>
+
+
+        <!-- End of Footer -->
+        <!-- End of Page Wrapper -->
+        </div>
+    {% endif %}
+
+
+{% endblock %}
+
+
+
+</div>
