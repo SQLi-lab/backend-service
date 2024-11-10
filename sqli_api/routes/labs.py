@@ -22,7 +22,8 @@ def labs(request):
     sort_by = request.GET.get('sort', 'date_created')
 
     active_labs = Lab.objects.filter(user_id=request.user,
-                                     status__in=['Создается',
+                                     status__in=['В очереди',
+                                                 'Создается',
                                                  'Выполняется']).values("uuid",
                                                                         "name",
                                                                         "date_created",
@@ -102,7 +103,8 @@ def lab_add(request):
 
     user = request.user
 
-    if Lab.objects.filter(user_id=user).filter(status__in=['Создается',
+    if Lab.objects.filter(user_id=user).filter(status__in=['В очереди',
+                                                           'Создается',
                                                            'Выполняется']).exists() and not request.user.is_superuser:
         return render(request, 'pages/400.html')
 
@@ -117,13 +119,14 @@ def lab_add(request):
     lab = Lab.objects.create(
         uuid=uuid.uuid4(),
         secret_hash=secret,
-        date_started=datetime.now(),
+        date_started=make_aware(datetime.now()),
         user=user,
-        status='Создается',
+        status='В очереди',
         expired_seconds=expired_seconds
     )
 
-    # TODO: shared_task creating
+    # TODO: запрос на создание, использовать DEPLOY_SECRET
+    a = 1
 
     return JsonResponse(
         {'message': 'Лабораторная работа создана'},
@@ -203,7 +206,6 @@ def lab_check(request, uuid):
     # if hashlib.sha256(secret.encode('utf-8')) == lab.secret_hash:
     #     return JsonResponse(
     #         {'message': 'Данные верны'}, status=200)
-
 
     if secret == lab.secret_hash:
         return JsonResponse(

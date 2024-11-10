@@ -1,5 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseNotAllowed
+
 from sqli_api.config import GROUP_MAP, YES_NO
 from sqli_api.models import CustomUser, Lab
 from django.shortcuts import render
@@ -23,3 +24,4 @@ def my_account(request):
                "active_labs": active_labs, "done_labs": done_labs}
 
     return render(request, 'user/user.html', context)
+
