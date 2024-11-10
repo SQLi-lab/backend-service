@@ -2,6 +2,7 @@ import hashlib
 import random
 import json
 import uuid
+import requests
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404
@@ -12,6 +13,8 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from sqli_api.models import Lab
 from datetime import datetime
+
+from sqli_lab.settings import DEPLOY_URL, DEPLOY_SECRET
 
 
 @login_required
@@ -33,6 +36,7 @@ def labs(request):
 
     removed_labs = Lab.objects.filter(user_id=request.user,
                                       status__in=['Ошибка создания',
+                                                  'Ошибка удаления',
                                                   'Останавливается',
                                                   'Остановлена']).values("uuid",
                                                                          "name",
@@ -111,22 +115,35 @@ def lab_add(request):
     expired_seconds = 1800 if Lab.objects.filter(user=user,
                                                  is_done=True).exists() and not request.user.is_superuser else 10800
 
-    random_number = random.randint(1, 999999)
-    secret = f'secret_{hashlib.sha1(str(random_number).encode('utf-8')).hexdigest()}'
-    secret_hash = hashlib.sha256(str(secret).encode('utf-8')).hexdigest()
-
-    # TODO: доделать создание лабы убрать автоматом время начала
     lab = Lab.objects.create(
         uuid=uuid.uuid4(),
-        secret_hash=secret,
-        date_started=make_aware(datetime.now()),
         user=user,
         status='В очереди',
         expired_seconds=expired_seconds
     )
 
-    # TODO: запрос на создание, использовать DEPLOY_SECRET
-    a = 1
+    data = {
+        'name': lab.name,
+        'uuid': str(lab.uuid),
+        'deploy_secret': DEPLOY_SECRET
+    }
+
+    try:
+        response = requests.post(f'{DEPLOY_URL}/lab/add', json=data)
+    except Exception as e:
+        lab.status = 'Ошибка создания'
+        lab.error_log = 'Ошибка создания лабораторной работы, сервер не доступен'
+        lab.save()
+        return JsonResponse(
+            {'message': 'Ошибка создания лабораторной'},
+            status=500)
+    if response.status_code != 200:
+        lab.status = 'Ошибка создания'
+        lab.error_log = 'Ошибка создания лабораторной работы, сервер не доступен'
+        lab.save()
+        return JsonResponse(
+            {'message': 'Ошибка создания лабораторной'},
+            status=500)
 
     return JsonResponse(
         {'message': 'Лабораторная работа создана'},
@@ -143,14 +160,34 @@ def lab_delete(request, uuid):
     if lab.user != request.user:
         return render(request, 'pages/401.html')
 
-    # TODO: shared_task
-    # TODO: отложенная задача завершения лаыбы + статус
     lab.status = 'Останавливается'
     lab.save()
 
+    data = {
+        'name': lab.name,
+        'uuid': str(lab.uuid),
+        'deploy_secret': DEPLOY_SECRET
+    }
+
+    try:
+        response = requests.delete(f'{DEPLOY_URL}/lab/delete', json=data)
+    except Exception as e:
+        lab.status = 'Ошибка удаления'
+        lab.error_log = 'Ошибка удаления лабораторной работы, сервер не доступен'
+        lab.save()
+        return JsonResponse(
+            {'message': 'Ошибка удаления лабораторной'},
+            status=500)
+    if response.status_code != 200:
+        lab.status = 'Ошибка удаления'
+        lab.error_log = 'Ошибка удаления лабораторной работы, сервер не доступен'
+        lab.save()
+        return JsonResponse(
+            {'message': 'Ошибка создания лабораторной'},
+            status=500)
+
     return JsonResponse(
-        {'message': 'Лабораторная работа удалена', 'lab_id': lab.id},
-        status=200)
+        {'message': 'Лабораторная работа удалена'}, status=200)
 
 
 @login_required
@@ -202,12 +239,18 @@ def lab_check(request, uuid):
     if lab.is_done:
         return JsonResponse(
             {'message': 'Данные верны', 'status': 'success'}, status=200)
-
+    # TODO: uncomment
     # if hashlib.sha256(secret.encode('utf-8')) == lab.secret_hash:
+    #     lab.date_done = make_aware(datetime.now())
+    #     lab.is_done = True
+    #     lab.save()
     #     return JsonResponse(
     #         {'message': 'Данные верны'}, status=200)
 
     if secret == lab.secret_hash:
+        lab.date_done = make_aware(datetime.now())
+        lab.is_done = True
+        lab.save()
         return JsonResponse(
             {'message': 'Данные верны', 'status': 'success'}, status=200)
 

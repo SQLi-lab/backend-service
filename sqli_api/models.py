@@ -75,7 +75,7 @@ class Lab(models.Model):
     name = models.CharField(default=generate_unique_lab_name)
     uuid = models.UUIDField(unique=True, editable=False, default=uuid.uuid4)
     url = models.URLField(unique=True, blank=True, null=True)
-    secret_hash = models.CharField(max_length=1024, unique=False)
+    secret_hash = models.CharField(max_length=1024, unique=False, null=True)
     expired_seconds = models.IntegerField(null=False)
     date_created = models.DateTimeField(auto_now_add=True)
     date_started = models.DateTimeField(auto_now_add=False, null=True)

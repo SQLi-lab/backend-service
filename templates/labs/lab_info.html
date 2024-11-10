@@ -34,7 +34,7 @@
                         </div>
 
                         <div class="
-                    {% if lab.status == 'Ошибка создания' %}
+                    {% if lab.status == 'Ошибка создания' or lab.status == 'Ошибка удаления' %}
                         text-danger
                     {% elif lab.status == 'Создается' or lab.status == 'Выполняется' %}
                         text-primary
@@ -77,7 +77,7 @@
 
                     {% endif %}
 
-                    {% if lab.status == 'Ошибка создания' %}
+                    {% if lab.status == 'Ошибка создания' or lab.status == 'Ошибка удаления' %}
                         <div class="card-body text-gray-900">
                             <strong>Ошибка:</strong> {{ lab.error_log }}
                         </div>
