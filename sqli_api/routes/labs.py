@@ -129,20 +129,20 @@ def lab_add(request):
     }
 
     try:
-        response = requests.post(f'{DEPLOY_URL}/lab/add', json=data)
+        response = requests.post(f'{DEPLOY_URL}/api/v1/lab/add', json=data)
     except Exception as e:
         lab.status = 'Ошибка создания'
         lab.error_log = 'Ошибка создания лабораторной работы, сервер не доступен'
         lab.save()
         return JsonResponse(
-            {'message': 'Ошибка создания лабораторной'},
+            {'message': 'сервер не доступен!'},
             status=500)
     if response.status_code != 200:
         lab.status = 'Ошибка создания'
         lab.error_log = 'Ошибка создания лабораторной работы, сервер не доступен'
         lab.save()
         return JsonResponse(
-            {'message': 'Ошибка создания лабораторной'},
+            {'message': 'сервер не доступен!'},
             status=500)
 
     return JsonResponse(
@@ -160,30 +160,30 @@ def lab_delete(request, uuid):
     if lab.user != request.user:
         return render(request, 'pages/401.html')
 
-    lab.status = 'Останавливается'
-    lab.save()
-
     data = {
         'name': lab.name,
         'uuid': str(lab.uuid),
         'deploy_secret': DEPLOY_SECRET
     }
 
+    lab.status = 'Останавливается'
+    lab.save()
+
     try:
-        response = requests.post(f'{DEPLOY_URL}/lab/delete', json=data)
+        response = requests.delete(f'{DEPLOY_URL}/api/v1/lab/delete', json=data)
     except Exception as e:
         lab.status = 'Ошибка удаления'
         lab.error_log = 'Ошибка удаления лабораторной работы, сервер не доступен'
         lab.save()
         return JsonResponse(
-            {'message': 'Ошибка удаления лабораторной'},
+            {'message': 'сервер не доступен!'},
             status=500)
     if response.status_code != 200:
         lab.status = 'Ошибка удаления'
         lab.error_log = 'Ошибка удаления лабораторной работы, сервер не доступен'
         lab.save()
         return JsonResponse(
-            {'message': 'Ошибка создания лабораторной'},
+            {'message': 'сервер не доступен!'},
             status=500)
 
     return JsonResponse(
@@ -233,6 +233,18 @@ def lab_check(request, uuid):
 
     lab = get_object_or_404(Lab, uuid=uuid)
 
+    current_time = make_aware(datetime.now())
+    duration_seconds = lab.expired_seconds
+    date_started = lab.date_started
+    elapsed_time = (current_time - date_started).total_seconds()
+    remaining_seconds = max(duration_seconds - elapsed_time, 0)
+
+    if remaining_seconds < 1:
+        if not secret:
+            return JsonResponse(
+                {'status': 'error', 'message': 'Время вышло, начните лабораторную заново'}, status=400)
+
+
     if lab.user.id != request.user.id and not request.user.is_superuser:
         return render(request, 'pages/401.html')
 
@@ -262,3 +274,32 @@ def labs_stats(request):
         'completed': completed_count,
     }
     return JsonResponse(data)
+
+
+@login_required
+def get_lab_status(request, uuid):
+    if request.method != 'GET':
+        return render(request, 'pages/400.html')
+
+    lab = get_object_or_404(Lab, uuid=uuid)
+
+    if lab.user.id != request.user.id:
+        if not request.user.is_superuser:
+            return render(request, 'pages/401.html')
+
+    return JsonResponse({'status': lab.status})
+
+@login_required
+def get_lab_statuses(request):
+    if request.method != 'GET':
+        return render(request, 'pages/400.html')
+
+    labs = Lab.objects.filter(user_id=request.user.id,
+                                     status__in=['В очереди',
+                                                 'Создается',
+                                                 'Выполняется',
+                                                 'Ошибка создания']).values("uuid",
+                                                                        "status").order_by(
+        '-id')
+
+    return JsonResponse(list(labs), safe=False)
