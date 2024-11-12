@@ -2,6 +2,7 @@ import random
 import uuid
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, \
     PermissionsMixin
+from django.core.validators import RegexValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
@@ -42,7 +43,17 @@ class CustomUserManager(BaseUserManager):
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(_('ФИО'), max_length=150, unique=False)
     uuid = models.UUIDField(unique=True, editable=False, default=uuid.uuid4)
-    study_group = models.CharField(_('Номер группы'), max_length=50)
+    study_group = models.CharField(
+        _('Номер группы'),
+        max_length=50,
+        validators=[
+            RegexValidator(
+                regex=r'^\d{7}/\d{5}$',
+                message=_(
+                    'Группа должна быть в формате XXXXXXX/XXXXX.'),
+            )
+        ]
+    )
     group = models.CharField(_('Группа'), max_length=120, default='student')
     email = models.EmailField(_('email'), unique=True)
     verified = models.BooleanField(_('Подтвержден'), default=False)

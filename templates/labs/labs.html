@@ -462,7 +462,7 @@
                 .catch(error => {
                     console.error('Ошибка при обновлении статусов:', error)
                     Notification('error', `Ошибка получения статусов: ${error}`);
-                }
+                
                 })
                 .finally(() => {
                     isUpdating = false; // Сбрасываем флаг

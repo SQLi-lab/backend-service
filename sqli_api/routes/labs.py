@@ -131,16 +131,12 @@ def lab_add(request):
     try:
         response = requests.post(f'{DEPLOY_URL}/api/v1/lab/add', json=data)
     except Exception as e:
-        lab.status = 'Ошибка создания'
-        lab.error_log = 'Ошибка создания лабораторной работы, сервер не доступен'
-        lab.save()
+        lab.delete()
         return JsonResponse(
             {'message': 'сервер не доступен!'},
             status=500)
     if response.status_code != 200:
-        lab.status = 'Ошибка создания'
-        lab.error_log = 'Ошибка создания лабораторной работы, сервер не доступен'
-        lab.save()
+        lab.delete()
         return JsonResponse(
             {'message': 'сервер не доступен!'},
             status=500)
