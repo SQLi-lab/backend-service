@@ -23,7 +23,7 @@
                             <h3 class="mb-0">Лабораторная {{ lab.name }}</h3>
 
                             {% if lab.status == 'Выполняется' and remaining_seconds != 0 %}
-                                <a id="labLink" href="#"
+                                <a id="labLink" href="{{ lab.url }}"
                                    class="btn btn-primary btn-icon-split btn-sm">
                         <span class="icon text-white-50">
                             <i class="fas fa-external-link-alt"></i>

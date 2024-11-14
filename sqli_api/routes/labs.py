@@ -163,6 +163,7 @@ def lab_delete(request, uuid):
     }
 
     lab.status = 'Останавливается'
+    lab.url = None
     lab.save()
 
     try:
