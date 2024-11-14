@@ -1,3 +1,5 @@
+from typing import re
+
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django import forms
@@ -29,6 +31,12 @@ class CustomUserCreationForm(forms.ModelForm):
         if CustomUser.objects.filter(email=email).exists():
             raise forms.ValidationError("Этот email уже зарегистрирован!")
         return email
+
+    def clean_group(self):
+        study_group = self.cleaned_data.get('study_group')
+        if not re.match(r'^\d{7}/\d{5}$', study_group):
+            raise forms.ValidationError('Группа должна быть в формате XXXXXXX/XXXXX.')
+        return study_group
 
 
 class CustomLoginForm(AuthenticationForm):

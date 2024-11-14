@@ -23,9 +23,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure--mb5lee=*vjk9k(c-^tt4&i$hst%ri!0%i6i9u*8&5-vrtqn(r'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# DEBUG = int(os.getenv("DEBUG", 0)) == 0
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -37,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'sqli_api'
+    'sqli_api',
 ]
 
 MIDDLEWARE = [
@@ -132,9 +133,8 @@ AUTH_USER_MODEL = 'sqli_api.CustomUser'
 
 LOGIN_URL = '/login/'
 
-CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/0')
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
-
 SESSION_COOKIE_AGE = 4 * 60 * 60
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+DEPLOY_URL = os.getenv("DEPLOY_URL", "http://deploy-service:8001")
+DEPLOY_SECRET = '7a7caad9b1951db075d508610ae97d87a33e9a33537d9d9604fc035acc084a7d'

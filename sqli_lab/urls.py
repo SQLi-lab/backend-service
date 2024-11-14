@@ -22,3 +22,9 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
 ]
+
+handler400 = 'sqli_api.views.handler400'
+handler401 = 'sqli_api.views.handler401'
+handler403 = 'sqli_api.views.handler403'
+handler404 = 'sqli_api.views.handler404'
+handler500 = 'sqli_api.views.handler500'

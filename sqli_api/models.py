@@ -2,6 +2,7 @@ import random
 import uuid
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, \
     PermissionsMixin
+from django.core.validators import RegexValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
@@ -42,7 +43,17 @@ class CustomUserManager(BaseUserManager):
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(_('ФИО'), max_length=150, unique=False)
     uuid = models.UUIDField(unique=True, editable=False, default=uuid.uuid4)
-    study_group = models.CharField(_('Номер группы'), max_length=50)
+    study_group = models.CharField(
+        _('Номер группы'),
+        max_length=50,
+        validators=[
+            RegexValidator(
+                regex=r'^\d{7}/\d{5}$',
+                message=_(
+                    'Группа должна быть в формате XXXXXXX/XXXXX.'),
+            )
+        ]
+    )
     group = models.CharField(_('Группа'), max_length=120, default='student')
     email = models.EmailField(_('email'), unique=True)
     verified = models.BooleanField(_('Подтвержден'), default=False)
@@ -75,7 +86,7 @@ class Lab(models.Model):
     name = models.CharField(default=generate_unique_lab_name)
     uuid = models.UUIDField(unique=True, editable=False, default=uuid.uuid4)
     url = models.URLField(unique=True, blank=True, null=True)
-    secret_hash = models.CharField(max_length=1024, unique=False)
+    secret_hash = models.CharField(max_length=1024, unique=False, null=True)
     expired_seconds = models.IntegerField(null=False)
     date_created = models.DateTimeField(auto_now_add=True)
     date_started = models.DateTimeField(auto_now_add=False, null=True)

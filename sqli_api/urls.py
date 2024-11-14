@@ -4,7 +4,7 @@ from django.views.generic import RedirectView
 from .routes.admin import admin_help, admin_users, admin_user_verify, \
     admin_user_delete, admin_labs_dump, admin_users_dump, admin_custom_lab
 from .routes.labs import lab_add, labs, lab_info, lab_delete, labs_stats, \
-    lab_check, admin_labs
+    lab_check, admin_labs, get_lab_status, get_lab_statuses
 from .routes.login import login_view, logout_view, register_view
 from .routes.user import my_account
 from .routes.help import help
@@ -15,9 +15,11 @@ urlpatterns = [
     path('logout/', logout_view, name='logout'),
     path('register/', register_view, name='register'),
 
+    path('labs/<uuid:uuid>/status', get_lab_status, name='get_lab_status'),
     path('labs/<uuid:uuid>/delete', lab_delete, name='lab_delete'),
     path('labs/<uuid:uuid>/check', lab_check, name='lab_check'),
     path('labs/<uuid:uuid>', lab_info, name='lab_info'),
+    path('labs/statuses/', get_lab_statuses, name='get_lab_statuses'),
     path('labs/stats', labs_stats, name='lab_stats'),
     path('labs/add/', lab_add, name='lab_add'),
     path('labs/', labs, name='labs'),

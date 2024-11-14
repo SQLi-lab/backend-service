@@ -57,7 +57,7 @@
                             <tr class="
                                 {% if lab.status == 'Выполняется' %}
                                     table-info
-                                {% elif lab.status == 'Ошибка создания' %}
+                                {% elif lab.status == 'Ошибка создания' or lab.status == 'Ошибка удаления' %}
                                     table-danger
                                 {% elif lab.is_done %}
                                     table-success
