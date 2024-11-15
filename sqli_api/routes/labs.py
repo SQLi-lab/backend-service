@@ -14,7 +14,7 @@ from django.db.models import Q
 from sqli_api.models import Lab
 from datetime import datetime
 
-from sqli_lab.settings import DEPLOY_URL, DEPLOY_SECRET
+from sqli_lab.settings import DEPLOY_URL, DEPLOY_SECRET, WATCHER_URL
 
 
 @login_required
@@ -125,6 +125,7 @@ def lab_add(request):
     data = {
         'name': lab.name,
         'uuid': str(lab.uuid),
+        'expired_seconds': str(expired_seconds),
         'deploy_secret': DEPLOY_SECRET
     }
 
@@ -159,6 +160,7 @@ def lab_delete(request, uuid):
     data = {
         'name': lab.name,
         'uuid': str(lab.uuid),
+        'expired_seconds': str(lab.expired_seconds),
         'deploy_secret': DEPLOY_SECRET
     }
 
@@ -167,17 +169,17 @@ def lab_delete(request, uuid):
     lab.save()
 
     try:
-        response = requests.delete(f'{DEPLOY_URL}/api/v1/lab/delete', json=data)
+        response = requests.post(f'{WATCHER_URL}/api/v1/cansel', json=data)
     except Exception as e:
         lab.status = 'Ошибка удаления'
-        lab.error_log = 'Ошибка удаления лабораторной работы, сервер не доступен'
+        lab.error_log = 'Ошибка удаления лабораторной работы, watcher не доступен'
         lab.save()
         return JsonResponse(
             {'message': 'сервер не доступен!'},
             status=500)
     if response.status_code != 200:
         lab.status = 'Ошибка удаления'
-        lab.error_log = 'Ошибка удаления лабораторной работы, сервер не доступен'
+        lab.error_log = 'Ошибка удаления лабораторной работы, watcher не доступен'
         lab.save()
         return JsonResponse(
             {'message': 'сервер не доступен!'},
