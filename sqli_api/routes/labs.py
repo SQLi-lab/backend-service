@@ -1,9 +1,7 @@
 import hashlib
-import random
 import json
 import uuid
 import requests
-
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseNotAllowed, \
@@ -19,6 +17,9 @@ from sqli_lab.settings import DEPLOY_URL, DEPLOY_SECRET, WATCHER_URL
 
 @login_required
 def labs(request):
+    """
+    Функция собирает инфорамцию о лабораторных и выводит на странице 'Мои лабораторные'
+    """
     if request.method != 'GET':
         return render(request, 'pages/400.html')
 
@@ -70,6 +71,9 @@ def labs(request):
 
 @login_required
 def admin_labs(request):
+    """
+    Функция рендерит страничку админа с лабораторными студентов
+    """
     if request.method != 'GET':
         return HttpResponseNotAllowed(['GET'], 'Метод не поддерживается')
 
@@ -221,6 +225,9 @@ def lab_info(request, uuid):
 
 
 def lab_check(request, uuid):
+    """
+    Функция проверяет ответ на лабораторную
+    """
     if request.method != 'POST':
         return render(request, 'pages/400.html')
 
@@ -264,6 +271,9 @@ def lab_check(request, uuid):
 
 @login_required
 def labs_stats(request):
+    """
+    Функция рендерит диаграмму статистики
+    """
     created_count = Lab.objects.filter(user=request.user).count()
     completed_count = Lab.objects.filter(user=request.user,
                                          is_done=True).count()
@@ -277,6 +287,9 @@ def labs_stats(request):
 
 @login_required
 def get_lab_status(request, uuid):
+    """
+    Функция получает статус лабораторной по uuid
+    """
     if request.method != 'GET':
         return render(request, 'pages/400.html')
 
@@ -290,6 +303,9 @@ def get_lab_status(request, uuid):
 
 @login_required
 def get_lab_statuses(request):
+    """
+    Функция для обновления статусов лабораторных на главной странице
+    """
     if request.method != 'GET':
         return render(request, 'pages/400.html')
 
