@@ -452,7 +452,7 @@
                         const labElement = document.getElementById(`${lab.uuid}`);
 
                         if (labElement) {
-                            if (lab.status === 'Ошибка создания') {
+                            if (lab.status === 'Ошибка создания' || lab.status === 'Остановлена') {
                                 window.location.reload();
                             }
                             labElement.textContent = lab.status;

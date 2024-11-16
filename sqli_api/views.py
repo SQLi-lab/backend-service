@@ -1,6 +1,6 @@
 from django.shortcuts import render
 
-
+# ниже указаны хендлеры ошибок Django
 def handler400(request, exception=None):
     return render(request, 'pages/400.html')
 

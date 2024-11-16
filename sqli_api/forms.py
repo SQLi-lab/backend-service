@@ -1,11 +1,5 @@
-from typing import re
-
-from django import forms
-from django.contrib.auth.forms import UserCreationForm
-from django import forms
+import re
 from django.contrib.auth.forms import AuthenticationForm
-from .models import CustomUser, Lab
-
 from django import forms
 from .models import CustomUser
 

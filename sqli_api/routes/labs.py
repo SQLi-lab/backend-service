@@ -1,9 +1,7 @@
 import hashlib
-import random
 import json
 import uuid
 import requests
-
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseNotAllowed, \
@@ -14,11 +12,14 @@ from django.db.models import Q
 from sqli_api.models import Lab
 from datetime import datetime
 
-from sqli_lab.settings import DEPLOY_URL, DEPLOY_SECRET
+from sqli_lab.settings import DEPLOY_URL, DEPLOY_SECRET, WATCHER_URL
 
 
 @login_required
 def labs(request):
+    """
+    Функция собирает инфорамцию о лабораторных и выводит на странице 'Мои лабораторные'
+    """
     if request.method != 'GET':
         return render(request, 'pages/400.html')
 
@@ -70,6 +71,9 @@ def labs(request):
 
 @login_required
 def admin_labs(request):
+    """
+    Функция рендерит страничку админа с лабораторными студентов
+    """
     if request.method != 'GET':
         return HttpResponseNotAllowed(['GET'], 'Метод не поддерживается')
 
@@ -125,6 +129,7 @@ def lab_add(request):
     data = {
         'name': lab.name,
         'uuid': str(lab.uuid),
+        'expired_seconds': str(expired_seconds),
         'deploy_secret': DEPLOY_SECRET
     }
 
@@ -159,6 +164,7 @@ def lab_delete(request, uuid):
     data = {
         'name': lab.name,
         'uuid': str(lab.uuid),
+        'expired_seconds': str(lab.expired_seconds),
         'deploy_secret': DEPLOY_SECRET
     }
 
@@ -167,17 +173,17 @@ def lab_delete(request, uuid):
     lab.save()
 
     try:
-        response = requests.delete(f'{DEPLOY_URL}/api/v1/lab/delete', json=data)
+        response = requests.post(f'{WATCHER_URL}/api/v1/cansel', json=data)
     except Exception as e:
         lab.status = 'Ошибка удаления'
-        lab.error_log = 'Ошибка удаления лабораторной работы, сервер не доступен'
+        lab.error_log = 'Ошибка удаления лабораторной работы, watcher не доступен'
         lab.save()
         return JsonResponse(
             {'message': 'сервер не доступен!'},
             status=500)
     if response.status_code != 200:
         lab.status = 'Ошибка удаления'
-        lab.error_log = 'Ошибка удаления лабораторной работы, сервер не доступен'
+        lab.error_log = 'Ошибка удаления лабораторной работы, watcher не доступен'
         lab.save()
         return JsonResponse(
             {'message': 'сервер не доступен!'},
@@ -219,6 +225,9 @@ def lab_info(request, uuid):
 
 
 def lab_check(request, uuid):
+    """
+    Функция проверяет ответ на лабораторную
+    """
     if request.method != 'POST':
         return render(request, 'pages/400.html')
 
@@ -262,6 +271,9 @@ def lab_check(request, uuid):
 
 @login_required
 def labs_stats(request):
+    """
+    Функция рендерит диаграмму статистики
+    """
     created_count = Lab.objects.filter(user=request.user).count()
     completed_count = Lab.objects.filter(user=request.user,
                                          is_done=True).count()
@@ -275,6 +287,9 @@ def labs_stats(request):
 
 @login_required
 def get_lab_status(request, uuid):
+    """
+    Функция получает статус лабораторной по uuid
+    """
     if request.method != 'GET':
         return render(request, 'pages/400.html')
 
@@ -288,6 +303,9 @@ def get_lab_status(request, uuid):
 
 @login_required
 def get_lab_statuses(request):
+    """
+    Функция для обновления статусов лабораторных на главной странице
+    """
     if request.method != 'GET':
         return render(request, 'pages/400.html')
 

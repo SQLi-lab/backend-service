@@ -1,6 +1,5 @@
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseNotAllowed
-
 from sqli_api.config import GROUP_MAP, YES_NO
 from sqli_api.models import CustomUser, Lab
 from django.shortcuts import render
@@ -8,6 +7,11 @@ from django.shortcuts import render
 
 @login_required
 def my_account(request):
+    """
+    Функция рендерит страницу Профиль
+    :param request:
+    :return:
+    """
     if request.method != "GET":
         return HttpResponseNotAllowed(['GET'], 'Метод не поддерживается')
 
