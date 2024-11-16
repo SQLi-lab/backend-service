@@ -1,9 +1,5 @@
-from django import forms
-from django.contrib.auth.forms import UserCreationForm
-from django import forms
+import re
 from django.contrib.auth.forms import AuthenticationForm
-from .models import CustomUser, Lab
-
 from django import forms
 from .models import CustomUser
 
@@ -29,6 +25,12 @@ class CustomUserCreationForm(forms.ModelForm):
         if CustomUser.objects.filter(email=email).exists():
             raise forms.ValidationError("Этот email уже зарегистрирован!")
         return email
+
+    def clean_group(self):
+        study_group = self.cleaned_data.get('study_group')
+        if not re.match(r'^\d{7}/\d{5}$', study_group):
+            raise forms.ValidationError('Группа должна быть в формате XXXXXXX/XXXXX.')
+        return study_group
 
 
 class CustomLoginForm(AuthenticationForm):

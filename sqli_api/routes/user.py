@@ -7,6 +7,11 @@ from django.shortcuts import render
 
 @login_required
 def my_account(request):
+    """
+    Функция рендерит страницу Профиль
+    :param request:
+    :return:
+    """
     if request.method != "GET":
         return HttpResponseNotAllowed(['GET'], 'Метод не поддерживается')
 
@@ -23,3 +28,4 @@ def my_account(request):
                "active_labs": active_labs, "done_labs": done_labs}
 
     return render(request, 'user/user.html', context)
+

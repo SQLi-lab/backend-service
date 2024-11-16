@@ -1,8 +1,7 @@
 import hashlib
-import random
 import json
 import uuid
-
+import requests
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseNotAllowed, \
@@ -13,16 +12,22 @@ from django.db.models import Q
 from sqli_api.models import Lab
 from datetime import datetime
 
+from sqli_lab.settings import DEPLOY_URL, DEPLOY_SECRET, WATCHER_URL
+
 
 @login_required
 def labs(request):
+    """
+    Функция собирает инфорамцию о лабораторных и выводит на странице 'Мои лабораторные'
+    """
     if request.method != 'GET':
         return render(request, 'pages/400.html')
 
     sort_by = request.GET.get('sort', 'date_created')
 
     active_labs = Lab.objects.filter(user_id=request.user,
-                                     status__in=['Создается',
+                                     status__in=['В очереди',
+                                                 'Создается',
                                                  'Выполняется']).values("uuid",
                                                                         "name",
                                                                         "date_created",
@@ -32,6 +37,7 @@ def labs(request):
 
     removed_labs = Lab.objects.filter(user_id=request.user,
                                       status__in=['Ошибка создания',
+                                                  'Ошибка удаления',
                                                   'Останавливается',
                                                   'Остановлена']).values("uuid",
                                                                          "name",
@@ -65,6 +71,9 @@ def labs(request):
 
 @login_required
 def admin_labs(request):
+    """
+    Функция рендерит страничку админа с лабораторными студентов
+    """
     if request.method != 'GET':
         return HttpResponseNotAllowed(['GET'], 'Метод не поддерживается')
 
@@ -102,28 +111,40 @@ def lab_add(request):
 
     user = request.user
 
-    if Lab.objects.filter(user_id=user).filter(status__in=['Создается',
+    if Lab.objects.filter(user_id=user).filter(status__in=['В очереди',
+                                                           'Создается',
                                                            'Выполняется']).exists() and not request.user.is_superuser:
         return render(request, 'pages/400.html')
 
     expired_seconds = 1800 if Lab.objects.filter(user=user,
                                                  is_done=True).exists() and not request.user.is_superuser else 10800
 
-    random_number = random.randint(1, 999999)
-    secret = f'secret_{hashlib.sha1(str(random_number).encode('utf-8')).hexdigest()}'
-    secret_hash = hashlib.sha256(str(secret).encode('utf-8')).hexdigest()
-
-    # TODO: доделать создание лабы убрать автоматом время начала
     lab = Lab.objects.create(
         uuid=uuid.uuid4(),
-        secret_hash=secret,
-        date_started=datetime.now(),
         user=user,
-        status='Создается',
+        status='В очереди',
         expired_seconds=expired_seconds
     )
 
-    # TODO: shared_task creating
+    data = {
+        'name': lab.name,
+        'uuid': str(lab.uuid),
+        'expired_seconds': str(expired_seconds),
+        'deploy_secret': DEPLOY_SECRET
+    }
+
+    try:
+        response = requests.post(f'{DEPLOY_URL}/api/v1/lab/add', json=data)
+    except Exception as e:
+        lab.delete()
+        return JsonResponse(
+            {'message': 'сервер не доступен!'},
+            status=500)
+    if response.status_code != 200:
+        lab.delete()
+        return JsonResponse(
+            {'message': 'сервер не доступен!'},
+            status=500)
 
     return JsonResponse(
         {'message': 'Лабораторная работа создана'},
@@ -140,14 +161,36 @@ def lab_delete(request, uuid):
     if lab.user != request.user:
         return render(request, 'pages/401.html')
 
-    # TODO: shared_task
-    # TODO: отложенная задача завершения лаыбы + статус
+    data = {
+        'name': lab.name,
+        'uuid': str(lab.uuid),
+        'expired_seconds': str(lab.expired_seconds),
+        'deploy_secret': DEPLOY_SECRET
+    }
+
     lab.status = 'Останавливается'
+    lab.url = None
     lab.save()
 
+    try:
+        response = requests.post(f'{WATCHER_URL}/api/v1/cansel', json=data)
+    except Exception as e:
+        lab.status = 'Ошибка удаления'
+        lab.error_log = 'Ошибка удаления лабораторной работы, watcher не доступен'
+        lab.save()
+        return JsonResponse(
+            {'message': 'сервер не доступен!'},
+            status=500)
+    if response.status_code != 200:
+        lab.status = 'Ошибка удаления'
+        lab.error_log = 'Ошибка удаления лабораторной работы, watcher не доступен'
+        lab.save()
+        return JsonResponse(
+            {'message': 'сервер не доступен!'},
+            status=500)
+
     return JsonResponse(
-        {'message': 'Лабораторная работа удалена', 'lab_id': lab.id},
-        status=200)
+        {'message': 'Лабораторная работа удалена'}, status=200)
 
 
 @login_required
@@ -182,6 +225,9 @@ def lab_info(request, uuid):
 
 
 def lab_check(request, uuid):
+    """
+    Функция проверяет ответ на лабораторную
+    """
     if request.method != 'POST':
         return render(request, 'pages/400.html')
 
@@ -193,6 +239,18 @@ def lab_check(request, uuid):
 
     lab = get_object_or_404(Lab, uuid=uuid)
 
+    current_time = make_aware(datetime.now())
+    duration_seconds = lab.expired_seconds
+    date_started = lab.date_started
+    elapsed_time = (current_time - date_started).total_seconds()
+    remaining_seconds = max(duration_seconds - elapsed_time, 0)
+
+    if remaining_seconds < 1:
+        if not secret:
+            return JsonResponse(
+                {'status': 'error', 'message': 'Время вышло, начните лабораторную заново'}, status=400)
+
+
     if lab.user.id != request.user.id and not request.user.is_superuser:
         return render(request, 'pages/401.html')
 
@@ -200,12 +258,10 @@ def lab_check(request, uuid):
         return JsonResponse(
             {'message': 'Данные верны', 'status': 'success'}, status=200)
 
-    # if hashlib.sha256(secret.encode('utf-8')) == lab.secret_hash:
-    #     return JsonResponse(
-    #         {'message': 'Данные верны'}, status=200)
-
-
-    if secret == lab.secret_hash:
+    if hashlib.sha256(secret.encode('utf-8')) == lab.secret_hash:
+        lab.date_done = make_aware(datetime.now())
+        lab.is_done = True
+        lab.save()
         return JsonResponse(
             {'message': 'Данные верны', 'status': 'success'}, status=200)
 
@@ -215,6 +271,9 @@ def lab_check(request, uuid):
 
 @login_required
 def labs_stats(request):
+    """
+    Функция рендерит диаграмму статистики
+    """
     created_count = Lab.objects.filter(user=request.user).count()
     completed_count = Lab.objects.filter(user=request.user,
                                          is_done=True).count()
@@ -224,3 +283,38 @@ def labs_stats(request):
         'completed': completed_count,
     }
     return JsonResponse(data)
+
+
+@login_required
+def get_lab_status(request, uuid):
+    """
+    Функция получает статус лабораторной по uuid
+    """
+    if request.method != 'GET':
+        return render(request, 'pages/400.html')
+
+    lab = get_object_or_404(Lab, uuid=uuid)
+
+    if lab.user.id != request.user.id:
+        if not request.user.is_superuser:
+            return render(request, 'pages/401.html')
+
+    return JsonResponse({'status': lab.status})
+
+@login_required
+def get_lab_statuses(request):
+    """
+    Функция для обновления статусов лабораторных на главной странице
+    """
+    if request.method != 'GET':
+        return render(request, 'pages/400.html')
+
+    labs = Lab.objects.filter(user_id=request.user.id,
+                                     status__in=['В очереди',
+                                                 'Создается',
+                                                 'Выполняется',
+                                                 'Ошибка создания']).values("uuid",
+                                                                        "status").order_by(
+        '-id')
+
+    return JsonResponse(list(labs), safe=False)

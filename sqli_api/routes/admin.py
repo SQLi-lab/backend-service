@@ -1,17 +1,18 @@
 import csv
 from datetime import datetime
-
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.http import HttpResponseNotAllowed, JsonResponse, HttpResponse
 from django.shortcuts import render
-
 from sqli_api.models import CustomUser, Lab
 
 
 @login_required
 def admin_help(request):
+    """
+    Функция рендерит страницу помощи админу
+    """
     if request.method != 'GET':
         return HttpResponseNotAllowed(['GET'], 'Метод не поддерживается')
 
@@ -23,6 +24,9 @@ def admin_help(request):
 
 @login_required
 def admin_users(request):
+    """
+    Функция рендерит страницу админа с таблицей пользователей системы
+    """
     if request.method != 'GET':
         return HttpResponseNotAllowed(['GET'], 'Метод не поддерживается')
 
@@ -55,6 +59,10 @@ def admin_users(request):
 
 @login_required
 def admin_user_verify(request, uuid):
+    """
+    Функция верификации незарегистрированного пользователя
+    """
+
     if request.method != 'GET':
         return HttpResponseNotAllowed(['GET'], 'Метод не поддерживается')
 
@@ -77,6 +85,9 @@ def admin_user_verify(request, uuid):
 
 @login_required
 def admin_user_delete(request, uuid):
+    """
+    Функция отмены регистрации незарегистрированного пользователя
+    """
     if request.method != 'GET':
         return HttpResponseNotAllowed(['GET'], 'Метод не поддерживается')
 
@@ -96,6 +107,9 @@ def admin_user_delete(request, uuid):
 
 @login_required
 def admin_labs_dump(request):
+    """
+    Функция дампа в csv файл БД с лабораторными
+    """
     if request.method != 'GET':
         return HttpResponseNotAllowed(['GET'], 'Метод не поддерживается')
 
@@ -124,6 +138,9 @@ def admin_labs_dump(request):
 
 @login_required
 def admin_users_dump(request):
+    """
+    Функция дампа в csv файл БД с пользователями системы
+    """
     if request.method != 'GET':
         return HttpResponseNotAllowed(['GET'], 'Метод не поддерживается')
 
@@ -153,6 +170,9 @@ def admin_users_dump(request):
 
 @login_required
 def admin_custom_lab(request):
+    """
+    Функцция рендерит страницу с созданием кастомной лабораторной для админа
+    """
     # TODO: сделать POST и создать форму, реализовать variant в модели CustomUser
 
     if not request.user.is_superuser:

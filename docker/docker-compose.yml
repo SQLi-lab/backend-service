@@ -1,0 +1,50 @@
+version: "3.8"
+
+services:
+  qsli_lab:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    restart: always
+    container_name: sqli_lab
+    command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+    ports:
+      - "8000:8000"
+    depends_on:
+      migrator:
+        condition: service_completed_successfully
+    env_file:
+      - ../.env.example
+
+  migrator:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: migrator
+    restart: "no"
+    command: ["python", "manage.py", "migrate"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - ../.env.example
+
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    restart: always
+    env_file:
+      - ../.env.example
+    user: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d sqli_lab -U sqli_user"]
+      interval: 10s
+      retries: 5
+      start_period: 5s
+      timeout: 5s
+#    volumes:
+#      - pg_data:/var/lib/postgresql/data
+#
+#volumes:
+#  pg_data:
+# TODO: добавить volume

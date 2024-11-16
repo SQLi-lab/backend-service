@@ -75,6 +75,10 @@
                                                                 <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
                                                                     {{ lab.name }}
                                                                 </div>
+                                                                <div class="text-xs font-weight-bold text-info  mb-1 lab-status"
+                                                                     id="{{ lab.uuid }}">
+                                                                    {{ lab.status }}
+                                                                </div>
                                                                 <div class="text-xs font-weight-bold text-gray-500 mb-1">
                                                                     Создана: {{ lab.date_created|date:"d.m.Y H:i" }}
 
@@ -222,7 +226,7 @@
                                     </div>
                                 </div>
                             {% else %}
-                                <div class="card border-left-secondary shadow h-100 py-2">
+                                <div class="card {% if lab.status == 'Ошибка создания' or lab.status == 'Ошибка удаления' %} border-left-danger {% else %} border-left-secondary {% endif %} shadow h-100 py-2">
                                     <div class="card-body">
                                         <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">
                                             {{ lab.name }}
@@ -292,7 +296,7 @@
                     .then(response => {
                         if (response.status !== 200) {
                             return response.json().then(errorData => {
-                                throw new Error(errorData.message || 'Ошибка при создании лабораторной работы');
+                                throw new Error(errorData.message);
                             });
                         } else {
                             return response.json();
@@ -303,7 +307,8 @@
                     })
                     .catch(error => {
                         console.error(error);
-                        alert('Ошибка создания лабы: ' + error.message);
+
+                        Notification('error', `Ошибка создания лабораторной работы: ${error}`);
                     });
             }
 
@@ -384,7 +389,7 @@
                         })
                         .catch(error => {
                             console.error(error);
-                            alert('Ошибка удаления лабы: ' + error.message);
+                            Notification('error', `Ошибка удаления лабораторной работы: ${error.message}`);
                         })
                         .finally(() => {
                             $('#deleteLabModal').modal('hide');
@@ -411,7 +416,7 @@
             </div>
         </footer>
     {% else %}
-</div>
+        </div>
         <!-- Footer -->
         <footer class="sticky-footer bg-white">
             <div class="container my-auto">
@@ -427,6 +432,48 @@
         <!-- End of Page Wrapper -->
         </div>
     {% endif %}
+
+    <script>
+        let isUpdating = false;
+
+        function updateLabStatuses() {
+            if (isUpdating) return; // Если уже идёт обновление, выходим
+            isUpdating = true;
+
+            fetch('/labs/statuses/', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(lab => {
+                        const labElement = document.getElementById(`${lab.uuid}`);
+
+                        if (labElement) {
+                            if (lab.status === 'Ошибка создания' || lab.status === 'Остановлена') {
+                                window.location.reload();
+                            }
+                            labElement.textContent = lab.status;
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Ошибка при обновлении статусов:', error)
+                    Notification('error', `Ошибка получения статусов: ${error}`);
+                
+                })
+                .finally(() => {
+                    isUpdating = false; // Сбрасываем флаг
+                });
+        }
+
+        setInterval(updateLabStatuses, 5000);
+        updateLabStatuses()
+
+
+    </script>
 
 
 {% endblock %}
