@@ -38,6 +38,7 @@ def labs(request):
     removed_labs = Lab.objects.filter(user_id=request.user,
                                       status__in=['Ошибка создания',
                                                   'Ошибка удаления',
+                                                  'Ошибка выполнения',
                                                   'Останавливается',
                                                   'Остановлена']).values("uuid",
                                                                          "name",
