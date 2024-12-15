@@ -8,13 +8,17 @@ services:
     restart: always
     container_name: sqli_lab
     command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
-    ports:
-      - "8000:8000"
     depends_on:
       migrator:
         condition: service_completed_successfully
     env_file:
       - ../.env.example
+    networks:
+      - sqli_lab
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.sqli_lab.rule=PathPrefix(`/`)"
+      - "traefik.http.services.sqli_lab.loadbalancer.server.port=8000"
 
   migrator:
     build:
@@ -26,6 +30,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    networks:
+      - sqli_lab
     env_file:
       - ../.env.example
 
@@ -35,6 +41,8 @@ services:
     restart: always
     env_file:
       - ../.env.example
+    networks:
+      - sqli_lab
     user: postgres
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -d sqli_lab -U sqli_user"]
@@ -48,3 +56,7 @@ services:
 #volumes:
 #  pg_data:
 # TODO: добавить volume
+
+networks:
+  sqli_lab:
+    external: true

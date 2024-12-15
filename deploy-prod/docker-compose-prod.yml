@@ -82,6 +82,8 @@ services:
       start_period: 5s
       timeout: 5s
 
+# TODO: доделать чтобы все ждали мигратор
+
 # TODO: nginx container
 
 volumes:
