@@ -82,6 +82,12 @@ function build_watcher() {
     cd ..
 }
 
+function build_fronts_schemas() {
+    # TODO: добавить билд фронтов
+    # dvwa-pharmary-front:latest
+    # dvwa-pharmary-back:latest
+}
+
 check_root
 check_files
 
