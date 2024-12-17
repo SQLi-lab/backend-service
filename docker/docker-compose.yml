@@ -2,19 +2,17 @@ version: "3.8"
 
 services:
   qsli_lab:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile
+    image: sqli-lab-backend:latest
     restart: always
     container_name: sqli_lab
-    command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+    networks:
+      - sqli_lab
+    command: [ "gunicorn", "--bind", "0.0.0.0:8000", "--workers", "4", "sqli_lab.wsgi:application" ]
     depends_on:
       migrator:
         condition: service_completed_successfully
     env_file:
       - ../.env.example
-    networks:
-      - sqli_lab
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.sqli_lab.rule=PathPrefix(`/`)"
@@ -43,6 +41,8 @@ services:
       - ../.env.example
     networks:
       - sqli_lab
+    ports:
+      - "5432:5432"
     user: postgres
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -d sqli_lab -U sqli_user"]
@@ -51,11 +51,7 @@ services:
       start_period: 5s
       timeout: 5s
 #    volumes:
-#      - pg_data:/var/lib/postgresql/data
-#
-#volumes:
-#  pg_data:
-# TODO: добавить volume
+#      - ../init.sql:/docker-entrypoint-initdb.d/init.sql:ro
 
 networks:
   sqli_lab:

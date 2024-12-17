@@ -73,6 +73,8 @@ services:
     restart: always
     networks:
       - sqli_lab
+    ports:
+      - "5432:5432"
     env_file:
       - .env
     user: postgres
@@ -113,6 +115,7 @@ services:
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.websecure.http.tls=true"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     environment:
@@ -202,8 +205,6 @@ services:
     networks:
       - sqli_lab
 #- MONITORING
-
-# TODO: доделать чтобы все ждали мигратор
 
 volumes:
   pg_data:

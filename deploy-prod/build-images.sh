@@ -83,6 +83,7 @@ function build_watcher() {
 }
 
 function build_fronts_schemas() {
+    pharmacy_tar_name=""
     # TODO: добавить билд фронтов
     # dvwa-pharmary-front:latest
     # dvwa-pharmary-back:latest

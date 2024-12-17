@@ -259,7 +259,7 @@ def lab_check(request, uuid):
         return JsonResponse(
             {'message': 'Данные верны', 'status': 'success'}, status=200)
 
-    if hashlib.sha256(secret.encode('utf-8')) == lab.secret_hash:
+    if hashlib.sha256(str(secret).encode('utf-8')).hexdigest() == lab.secret_hash:
         lab.date_done = make_aware(datetime.now())
         lab.is_done = True
         lab.save()
@@ -280,7 +280,7 @@ def labs_stats(request):
                                          is_done=True).count()
 
     data = {
-        'created': created_count,
+        'created': created_count - completed_count,
         'completed': completed_count,
     }
     return JsonResponse(data)
