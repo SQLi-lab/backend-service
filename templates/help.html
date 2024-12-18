@@ -5,14 +5,37 @@
 {% block content %}
     <!-- Begin Page Content -->
     <div class="container-fluid">
-        <div class="row">
-            <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                <h1 class="h3 mb-0 text-gray-800">Руководство пользователя</h1>
-            </div>
-        </div>
+        <h1 class="h3 mb-2 text-gray-900">Руководство пользователя</h1>
+         <p class="mb-2 text-gray-900">
+            <strong>Цель лабораторной работы:</strong> проэксплуатировать уязвимости SQL-Injection на сайте и найти 3 флага.<br>
+            
+            <ul>
+                <li class="text-gray-900">Студент может создать уникальную лабораторную работу, ей присваиваются имя и uuid.</li>
+                <li class="text-gray-900">После завершения создания будет доступна ссылка на уязвимый сайт.</li>
+                <li class="text-gray-900">На выполнение работы дается 3 часа, после чего лабораторная удаляется.</li>
+                <li class="text-gray-900">Каждый раз генерируется случайный вариант из разных предметных областей (типов сайтов).</li>
+                <li class="text-gray-900">Каждому студенту присваиваются свои уникальные флаги, которые необходимо найти на сайте: <code>ibks1_{...}</code>, <code>ibks2_{...}</code>, <code>ibks3_{...}</code>.</li>
+                <li class="text-gray-900">Ответ на лабораторную работу имеет вид: <code>secret_"содержимое_флагов_по_очереди"</code>.</li>
+            </ul>
+            
+            <strong class="text-gray-900">Пример:</strong>
+            <ul>
+                <li  class="text-gray-900">Флаги: <code>ibks1_{4564124c79b0b}</code>, <code>ibks2_{64e1cdb406a36}</code>, <code>ibks3_{fa435f3ae179e}</code>.</li>
+                <li  class="text-gray-900">Ответ: <code>secret_4564124c79b0b64e1cdb406a36fa435f3ae179e</code>.</li>
+            </ul>
+            
+            <text class="text-gray-900">После ввода правильного ответа лабораторная работа считается выполненной.</text> <br>
+            <text class="text-gray-900">Если студент выполнил хотя бы одну работу, то при дальнейшем создании работ ему будет выделено только 30 минут на выполнение.</text> <br>
+            <text class="text-gray-900">Для выполнения работы рекомендуется использовать не только браузер, но и инструементы Postman, BurpSuit, ZAP и т.п.</text> 
+        </p>
+        
         <hr>
-    <div class="text-black-50 small">Система разработана на базе Django, Docker и Ansible</div>
+    <div class="text-black-50 small">Система разработана с использованием языков программирования Python 3.12, Go 1.23 и фреймворка React 18.3.1.</div>
+    <div class="text-black-50 small">Для развертывания и управления используются Docker и Ansible.</div>
+    <div class="text-black-50 small">В качестве поддерживающих компонентов инфраструктуры применяются Postgres, Redis и Traefik.</div>
+
     </div>
+    
 
     </div>
     <!-- Footer -->

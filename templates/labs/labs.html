@@ -226,7 +226,7 @@
                                     </div>
                                 </div>
                             {% else %}
-                                <div class="card {% if lab.status == 'Ошибка создания' or lab.status == 'Ошибка удаления' %} border-left-danger {% else %} border-left-secondary {% endif %} shadow h-100 py-2">
+                                <div class="card {% if lab.status == 'Ошибка создания' or lab.status == 'Ошибка удаления' or lab.status == 'Ошибка выполнения' %} border-left-danger {% else %} border-left-secondary {% endif %} shadow h-100 py-2">
                                     <div class="card-body">
                                         <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">
                                             {{ lab.name }}
