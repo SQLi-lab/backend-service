@@ -41,9 +41,10 @@ function build_backend_service() {
     backend_service_tar_name="backend-service.tar.gz"
     backend_image_name="sqli-lab-backend:latest"
 
-    tar -xvf $backend_service_tar_namee
+    tar -xvf $backend_service_tar_name
     cd backend-service
-    docker build -t $backend_image_name -f docker/Dockerfile .
+    tar -xvf static.tar.gz
+    docker build -t $backend_image_name -f docker/Dockerfile . --no-cache
     cd ..
     rm -rf backend-service
 }
@@ -54,7 +55,7 @@ function build_deploy_service() {
 
     tar -xvf $deploy_service_tar_name
     cd deploy-service
-    docker build -t $deploy_service_image_name -f docker/Dockerfile .
+    docker build -t $deploy_service_image_name -f docker/Dockerfile . --no-cache
     cd ..
     rm -rf deploy-service
 }
@@ -65,7 +66,7 @@ function build_watcher() {
 
     tar -xvf $watcher_tar_name
     cd watcher-service
-    docker build -t $watcher_image_name -f docker/Dockerfile .
+    docker build -t $watcher_image_name -f docker/Dockerfile . --no-cache
     cd ..
     rm -rf watcher-service
 }
@@ -77,8 +78,8 @@ function build_fronts_schemas() {
 
     tar -xvf $pharmacy_tar_name
     cd dvwa-pharmacy
-    docker build -t $pharmacy_front_image_name -f pharmacy-app/Dockerfile.frontend pharmacy-app/
-    docker build -t $pharmacy_back_image_name -f pharmacy-back/Dockerfile.backend pharmacy-back/
+    docker build -t $pharmacy_front_image_name -f pharmacy-app/Dockerfile.frontend pharmacy-app/ --no-cache
+    docker build -t $pharmacy_back_image_name -f pharmacy-back/Dockerfile.backend pharmacy-back/ --no-cache
     cd ..
     rm -rf dvwa-pharmacy
 }
