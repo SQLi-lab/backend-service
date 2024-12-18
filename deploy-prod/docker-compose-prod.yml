@@ -5,19 +5,25 @@ services:
     image: sqli-lab-backend:latest
     restart: always
     container_name: sqli_lab
-    command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
-    ports:
-      - "8000:8000" # TODO: убрать порт, точка входа - nginx
+    networks:
+      - sqli_lab
+    command: [ "gunicorn", "--bind", "0.0.0.0:8000", "--workers", "4", "sqli_lab.wsgi:application" ]
     depends_on:
       migrator:
         condition: service_completed_successfully
     env_file:
       - .env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.sqli_lab.rule=PathPrefix(`/`)"
+      - "traefik.http.services.sqli_lab.loadbalancer.server.port=8000"
 
   migrator:
-    image: sqli-lab-backend-migrator:latest
+    image: sqli-lab-backend:latest
     container_name: migrator
     restart: "no"
+    networks:
+      - sqli_lab
     command: [ "python", "manage.py", "migrate" ]
     depends_on:
       postgres:
@@ -29,16 +35,20 @@ services:
     image: sqli-lab-deploy-service:latest
     container_name: deploy-service
     restart: always
+    networks:
+      - sqli_lab
     command: python3 main.py
     depends_on:
-      - dramatiq
+      - deploy-service-worker
     env_file:
       - .env
 
   deploy-service-worker:
-    image: sqli-lab-deploy-service-worker:latest
+    image: sqli-lab-deploy-service:latest
     container_name: deploy-service-worker
     restart: always
+    networks:
+      - sqli_lab
     command: dramatiq api.tasks --processes 4 --skip-logging
     depends_on:
       - redis
@@ -49,6 +59,8 @@ services:
     image: sqli-lab-watcher:latest
     container_name: watcher
     restart: always
+    networks:
+      - sqli_lab
     privileged: true
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -59,6 +71,8 @@ services:
     image: postgres:15
     container_name: postgres
     restart: always
+    networks:
+      - sqli_lab
     env_file:
       - .env
     user: postgres
@@ -75,6 +89,8 @@ services:
     image: redis:alpine
     restart: always
     container_name: redis
+    networks:
+      - sqli_lab
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
       interval: 10s
@@ -82,9 +98,115 @@ services:
       start_period: 5s
       timeout: 5s
 
-# TODO: доделать чтобы все ждали мигратор
+  traefik:
+    image: traefik:v2.10
+    container_name: traefik
+    restart: always
+    networks:
+      - sqli_lab
+    ports:
+      - "80:80"
+      - "443:443"
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.websecure.http.tls=true"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    environment:
+      - TRAEFIK_LOG_LEVEL=INFO
+    labels:
+      - "traefik.http.routers.api.rule=PathPrefix(`/dashboard`))"
 
-# TODO: nginx container
+
+# MONITORING
+  prometheus:
+    image: prom/prometheus:v3.0.0
+    volumes:
+      - ./prometheus:/etc/prometheus/
+    container_name: prometheus
+    hostname: prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+    networks:
+      - sqli_lab
+    environment:
+      TZ: "Europe/Moscow"
+
+  grafana:
+    image: grafana/grafana:10.4.12
+    user: root
+    depends_on:
+      - prometheus
+    volumes:
+      - ./grafana/provisioning/:/etc/grafana/provisioning/
+    container_name: grafana
+    hostname: grafana
+    restart: unless-stopped
+    environment:
+      TZ: "Europe/Moscow"
+      GF_SECURITY_ADMIN_USER: ${ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin}
+      GF_SERVER_ROOT_URL: /monitoring
+      GF_SERVER_SERVE_FROM_SUB_PATH: true
+    networks:
+      - sqli_lab
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.grafana.rule=PathPrefix(`/monitoring`)"
+      - "traefik.http.services.grafana.loadbalancer.server.port=3000"
+
+  node-exporter:
+    image: prom/node-exporter:v1.8.2
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    container_name: node-exporter
+    hostname: node-exporter
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs|run/user)($$|/)'
+    restart: unless-stopped
+    environment:
+      TZ: "Europe/Moscow"
+    networks:
+      - sqli_lab
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.49.1
+    container_name: cadvisor
+    privileged: true
+    devices:
+      - /dev/kmsg:/dev/kmsg
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker:/var/lib/docker:ro
+    restart: unless-stopped
+    environment:
+      TZ: "Europe/Moscow"
+    labels:
+      org.label-schema.group: "monitoring"
+    networks:
+      - sqli_lab
+#- MONITORING
 
 volumes:
   pg_data:
+
+networks:
+  sqli_lab:
+    external: true

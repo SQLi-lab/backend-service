@@ -2,3 +2,12 @@
 .git
 venv
 static
+deploy-prod.tar.gz
+deploy-prod/deploy-service.tar.gz
+deploy-prod/dvwa-pharmacy.tar.gz
+deploy-prod/watcher-service.tar.gz
+deploy-prod/backend-service.tar.gz
+deploy-prod/deploy-service
+deploy-prod/dvwa-pharmacy
+deploy-prod/watcher-service
+deploy-prod/backend-service
