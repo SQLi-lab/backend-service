@@ -19,7 +19,7 @@ services:
       - "traefik.http.services.sqli_lab.loadbalancer.server.port=8000"
 
   migrator:
-    image: sqli-lab-backend-migrator:latest
+    image: sqli-lab-backend:latest
     container_name: migrator
     restart: "no"
     networks:
@@ -44,7 +44,7 @@ services:
       - .env
 
   deploy-service-worker:
-    image: sqli-lab-deploy-service-worker:latest
+    image: sqli-lab-deploy-service:latest
     container_name: deploy-service-worker
     restart: always
     networks:
@@ -73,8 +73,6 @@ services:
     restart: always
     networks:
       - sqli_lab
-    ports:
-      - "5432:5432"
     env_file:
       - .env
     user: postgres

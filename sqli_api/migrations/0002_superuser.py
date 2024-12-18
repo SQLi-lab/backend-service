@@ -1,3 +1,4 @@
+import os
 from django.contrib.auth.hashers import make_password
 from django.db import migrations
 
@@ -10,7 +11,7 @@ def create_superuser(apps, schema_editor):
             group="admin",
             verified=True,
             email="admin@admin.com",
-            password=make_password("admin"),
+            password=make_password(os.getenv("ADMIN_PASS")),
             is_staff=True,
             is_superuser=True
         )
