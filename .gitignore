@@ -5,9 +5,17 @@ static
 deploy-prod.tar.gz
 deploy-prod/deploy-service.tar.gz
 deploy-prod/dvwa-pharmacy.tar.gz
+deploy-prod/dvwa-carshop.tar.gz
+deploy-prod/dvwa-clotheshop.tar.gz
+deploy-prod/dvwa-delivery.tar.gz
+deploy-prod/dvwa-cigarshop.tar.gz
 deploy-prod/watcher-service.tar.gz
 deploy-prod/backend-service.tar.gz
 deploy-prod/deploy-service
 deploy-prod/dvwa-pharmacy
+deploy-prod/dvwa-carshop
+deploy-prod/dvwa-clotheshop
+deploy-prod/dvwa-delivery
+deploy-prod/dvwa-cigarshop
 deploy-prod/watcher-service
 deploy-prod/backend-service
