@@ -33,9 +33,9 @@ Django сервис проекта лабораторных работ. Пане
 
 ## Развертывание Prod
 1. Склонировать `backend-service`
-2. В папку `deploy-prod` склонировать `deploy-service`, `watcher`, `dvwa-pharmacy` (и все остальные проекты фронтов)
-3. В `deploy-service/ansible/inventory.yml` обновить креды от хостовой машины Prod
-4. Собрать архивы tar.gz по с именами склонированных репозиториев в `deploy-prod`
+2. Перейти в папку deploy-prod
+3. Выполнить `./install_archives.sh`
+4. Собрать архив deploy-prod.tar.gz `tar -cf deploy-prod.tar.gz deploy-prod`
 5. Перенести на сервер `deploy-prod.tar.gz`, распаковать, запустить `install.sh`
 6. Запустить `docker compose -f docker-compose-prod.yml up --build -d`
 

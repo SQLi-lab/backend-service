@@ -158,9 +158,9 @@ function install_docker() {
 }
 
 
-check_root
-install_docker
-check_files
+#check_root
+#install_docker
+#check_files
 
 build_backend_service
 build_deploy_service
