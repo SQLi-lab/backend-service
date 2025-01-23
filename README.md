@@ -41,7 +41,8 @@ Django сервис проекта лабораторных работ. Пане
 7. Открыть `deploy-service/ansible/inventory.yml`, заменить креды от хостовой машины
 8. Перейти в deploy-prod, создать архив `tar -cvf deploy-service.tar.gz deploy-service`
 9. Запустить `install.sh`
-10. Запустить `docker compose -f docker-compose-prod.yml up --build -d`
+10. Создать папку для лаб `cd ~ && mkdir sqli_labs`
+11. Запустить `docker compose -f docker-compose-prod.yml up --build -d`
 
 ## Базовые креды 
 - `127.0.0.1/` - панель управления admin@admin.com:admin
