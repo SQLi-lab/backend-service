@@ -36,8 +36,12 @@ Django сервис проекта лабораторных работ. Пане
 2. Перейти в папку deploy-prod
 3. Выполнить `./install_archives.sh`
 4. Собрать архив deploy-prod.tar.gz `tar -cf deploy-prod.tar.gz deploy-prod`
-5. Перенести на сервер `deploy-prod.tar.gz`, распаковать, запустить `install.sh`
-6. Запустить `docker compose -f docker-compose-prod.yml up --build -d`
+5. Перенести на сервер `deploy-prod.tar.gz`, распаковать, `cd deploy-prod`
+6. Распаковать архив deploy-service.tar.gz `tar -xvf deploy-service.tar.gz` 
+7. Открыть `deploy-service/ansible/inventory.yml`, заменить креды от хостовой машины
+8. Перейти в deploy-prod, создать архив `tar -cvf deploy-service.tar.gz deploy-service`
+9. Запустить `install.sh`
+10. Запустить `docker compose -f docker-compose-prod.yml up --build -d`
 
 ## Базовые креды 
 - `127.0.0.1/` - панель управления admin@admin.com:admin
